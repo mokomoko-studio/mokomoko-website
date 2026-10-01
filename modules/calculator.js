@@ -98,6 +98,7 @@ export function initCalculator(root, content) {
       <span class="plan-description" ${editable(`${path}.description`)}>${escapeHtml(plan.description)}</span>
       ${planFeatures(plan).length ? `<span class="plan-features">${planFeatures(plan).map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>` : ""}
       ${plan.packageNote ? `<span class="plan-note" ${editable(`${path}.packageNote`)}>${escapeHtml(plan.packageNote)}</span>` : ""}
+      <span class="plan-estimate-button" aria-hidden="true">選擇並估價</span>
     </button>`;
   };
 
@@ -105,6 +106,14 @@ export function initCalculator(root, content) {
   root.querySelector("#limitedPlans").innerHTML = plans.filter((plan) => plan.group === "limited").map(planCard).join("");
   root.querySelector("#speciesChoices").innerHTML = Object.entries(engine.species).map(([key, info]) => `
     <button type="button" class="text-control" data-species="${key}" role="radio" aria-checked="false">${escapeHtml(info.label)}</button>`).join("");
+
+  const centerInitialPlan = () => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    const card = root.querySelector('[data-plan="easy"]');
+    const track = card?.closest(".plan-card-track");
+    if (!card || !track) return;
+    track.scrollLeft = card.offsetLeft - ((track.clientWidth - card.clientWidth) / 2);
+  };
 
   const currentPlan = () => engine.getPlan(state.plan);
 
@@ -225,7 +234,11 @@ export function initCalculator(root, content) {
 
   root.addEventListener("click", (event) => {
     const planButton = event.target.closest("[data-plan]");
-    if (planButton) return selectPlan(planButton.dataset.plan);
+    if (planButton) {
+      selectPlan(planButton.dataset.plan);
+      root.querySelector("#petStep")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      return;
+    }
     const speciesButton = event.target.closest("[data-species]");
     if (speciesButton) return selectSpecies(speciesButton.dataset.species);
     const countButton = event.target.closest("[data-count-delta]");
@@ -245,5 +258,6 @@ export function initCalculator(root, content) {
   });
 
   render();
+  requestAnimationFrame(centerInitialPlan);
   window.__MOKOMOKO_CALCULATOR__ = { state, engine, selectPlan, selectSpecies, changePetCount, changeProductCount };
 }

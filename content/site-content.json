@@ -10,6 +10,24 @@
     "instagramLabel": "MKMKPET",
     "instagramUrl": "https://www.instagram.com/mkmkpet/"
   },
+  "announcement": {
+    "enabled": true,
+    "text": "最新檔期與限定方案，歡迎私訊 MOKOMOKO 詢問 ♡",
+    "link": ""
+  },
+  "header": {
+    "logo": "MOKOMOKO",
+    "subtitle": "PET PHOTOGRAPHY",
+    "items": [
+      { "english": "About", "chinese": "關於我", "url": "#philosophy" },
+      { "english": "Plan", "chinese": "拍攝方案", "url": "#plans" },
+      { "english": "Gallery", "chinese": "作品集", "url": "https://www.instagram.com/mkmkpet/", "external": true },
+      { "english": "Flow", "chinese": "拍攝流程", "url": "#booking" },
+      { "english": "FAQ", "chinese": "常見問題", "url": "#faq" }
+    ],
+    "ctaLabel": "立即預約",
+    "ctaUrl": "#booking-form-section"
+  },
   "hero": {
     "kicker": "癒し系動物写真",
     "titleLines": ["MOKO", "MOKO"],

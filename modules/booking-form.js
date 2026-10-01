@@ -29,10 +29,10 @@ const renderField = (field) => {
   const options = field.options.map((option) => `<label class="booking-choice"><input type="${choiceType}" name="${field.name}" value="${escapeHtml(option)}"><span>${escapeHtml(option)}</span></label>`).join("");
   const otherId = `${field.key}-other`;
   const other = field.other ? `<label class="booking-choice"><input type="radio" name="${field.name}" value="__other_option__" data-other-target="${otherId}"><span>其他</span></label>${field.other.control === "textarea" ? `<textarea class="booking-other" id="${otherId}" name="${field.other.name}" rows="3" placeholder="${escapeHtml(field.other.placeholder)}" aria-label="${escapeHtml(field.other.placeholder)}" disabled></textarea>` : `<input class="booking-other" id="${otherId}" name="${field.other.name}" type="text" placeholder="${escapeHtml(field.other.placeholder)}" aria-label="${escapeHtml(field.other.placeholder)}" disabled>`}` : "";
-  return `<fieldset class="booking-field" data-field="${field.key}">
-    <legend class="booking-question">${escapeHtml(field.label)}${renderRequired(field)}</legend>
+  return `<div class="booking-field" data-field="${field.key}" role="group" aria-labelledby="${field.key}-question">
+    <p class="booking-question" id="${field.key}-question">${escapeHtml(field.label)}${renderRequired(field)}</p>
     ${hint}<div class="booking-choices">${options}${other}</div>${error}
-  </fieldset>`;
+  </div>`;
 };
 
 export function initBookingForm(root, content) {

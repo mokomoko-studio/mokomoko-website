@@ -19,7 +19,7 @@ const editablePath = (path) => {
   if (!path || /(^|\.)(price|originalPrice|applicablePetTypes|sortOrder|active|max)$/.test(path)) return false;
   if (/^(bookingForm|addons|integrations|meta)\./.test(path)) return false;
   if (/^calculator\.(species|limitedIncludedHours)/.test(path)) return false;
-  return /^(hero|intro|navigation|philosophy|photographyTypes|plans|faq|booking|bookingCta|closing|calculator)\./.test(path);
+  return /^(announcement|hero|intro|navigation|philosophy|photographyTypes|plans|faq|booking|bookingCta|closing|calculator)\./.test(path);
 };
 
 const setPath = (target, path, value) => {

@@ -1,6 +1,6 @@
-import { initCalculator } from "./modules/calculator.js";
-import { initBookingForm } from "./modules/booking-form.js";
-import { initEditor, prepareEditorContent } from "./modules/editor.js";
+import { initCalculator } from "./modules/calculator.js?v=mobile-refinement-1";
+import { initBookingForm } from "./modules/booking-form.js?v=mobile-refinement-1";
+import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-refinement-1";
 
 (() => {
   const contentUrl = document.body.dataset.contentUrl || "./content/site-content.json";
@@ -29,6 +29,41 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js";
   const renderImage = (image, className) => image.path
     ? `<div class="${className}"><img src="${safeUrl(image.path)}" alt="${escapeHtml(image.alt)}"></div>`
     : `<div class="${className} image-placeholder" role="img" aria-label="${escapeHtml(image.alt)}"><small>${escapeHtml(image.placeholder)}</small></div>`;
+
+  const renderHeaderLink = (item) => `<a class="header-nav-link" href="${safeUrl(item.url)}"${item.external ? ' target="_blank" rel="noopener noreferrer"' : ""}>
+    <span class="header-nav-english">${escapeHtml(item.english)}</span>
+    <span class="header-nav-chinese">${escapeHtml(item.chinese)}</span>
+  </a>`;
+
+  const renderBookingCta = (header, className = "") => `<a class="header-booking ${className}" href="${safeUrl(header.ctaUrl)}">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="1.5"></rect><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17"></path></svg>
+    <span>${escapeHtml(header.ctaLabel)}</span>
+  </a>`;
+
+  const renderAnnouncement = (announcement) => {
+    if (!announcement?.enabled || !announcement.text) return "";
+    const message = `<span${editAttr("announcement.text")}>${escapeHtml(announcement.text)}</span>`;
+    return `<aside class="announcement-bar" aria-label="最新消息">${announcement.link ? `<a href="${safeUrl(announcement.link)}">${message}</a>` : message}</aside>`;
+  };
+
+  const renderHeader = (header, hasAnnouncement = false) => `
+    <header class="site-header${hasAnnouncement ? " has-announcement" : ""}">
+      <div class="site-header-inner">
+        <a class="header-wordmark" href="#site-root" aria-label="回到網站頂部">
+          <span>${escapeHtml(header.logo)}</span>
+          <small>${escapeHtml(header.subtitle)}</small>
+        </a>
+        <nav class="header-desktop-nav" aria-label="主要導覽">${header.items.map(renderHeaderLink).join("")}</nav>
+        <div class="header-actions">
+          <span class="header-doodle" aria-hidden="true"><svg viewBox="0 0 42 40"><path d="M27 3l7 10M38 17l-9 3M24 25l-6 9"></path></svg></span>
+          ${renderBookingCta(header)}
+          <button class="header-menu-button" type="button" aria-expanded="false" aria-controls="mobile-navigation" aria-label="開啟導覽選單">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+      <nav id="mobile-navigation" class="header-mobile-nav" aria-label="手機主要導覽" hidden>${header.items.map(renderHeaderLink).join("")}</nav>
+    </header>`;
 
   const renderHero = ({ hero, social }) => `
     <section class="hero blue-section" aria-labelledby="hero-title">
@@ -66,16 +101,6 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js";
       </div>
     </section>`;
 
-  const renderPhotographyTypes = (section) => `
-    <section class="section light-gray" aria-labelledby="types-title">
-      <div class="content default centered">
-        <p class="section-kicker">PHOTO SESSION</p>
-        <h2 id="types-title" class="section-title"${editAttr("photographyTypes.title")}>${escapeHtml(section.title)}</h2>
-        ${renderLines(section.intro, "photographyTypes.intro", "copy-lines section-intro")}
-        <div class="session-types">${section.items.map((item, index) => `<article class="session-type"><p class="session-index">0${index + 1}</p><h3${editAttr(`photographyTypes.items.${index}.name`)}>${escapeHtml(item.name)}</h3><p class="session-lead"${editAttr(`photographyTypes.items.${index}.lead`)}>${escapeHtml(item.lead)}</p>${item.details.map((line, lineIndex) => `<p${editAttr(`photographyTypes.items.${index}.details.${lineIndex}`)}>${escapeHtml(line)}</p>`).join("")}</article>`).join("")}</div>
-      </div>
-    </section>`;
-
   const renderPricingCalculator = ({ calculator, integrations }) => `
     <section id="plans" class="section pricing-section" aria-labelledby="pricing-title">
       <div class="content">
@@ -96,10 +121,10 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js";
           <h2 id="faq-title" class="section-title"${editAttr("faq.title")}>${escapeHtml(section.title)}</h2>
           <div class="section-description"><span${editAttr("faq.intro.0")}>${escapeHtml(section.intro[0])}</span><br><span${editAttr("faq.intro.1")}>${escapeHtml(section.intro[1])}</span> <a href="${safeUrl(section.contact.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(section.contact.label)}</a> <span${editAttr("faq.intro.2")}>${escapeHtml(section.intro[2])}</span></div>
         </div>
-        <div class="faq-list">${section.items.map((item, index) => `<details class="faq-item">
-          <summary><span${editAttr(`faq.items.${index}.question`)}>${escapeHtml(item.question)}</span><span class="faq-toggle" aria-hidden="true">＋</span></summary>
-          <div class="faq-answer">${item.answer.map((line, lineIndex) => `<p${editAttr(`faq.items.${index}.answer.${lineIndex}`)}>${escapeHtml(line)}</p>`).join("")}${item.subquestion ? `<h3${editAttr(`faq.items.${index}.subquestion`)}>${escapeHtml(item.subquestion)}</h3>` : ""}${item.list.length ? `<ul>${item.list.map((line, lineIndex) => `<li${editAttr(`faq.items.${index}.list.${lineIndex}`)}>${escapeHtml(line)}</li>`).join("")}</ul>` : ""}</div>
-        </details>`).join("")}</div>
+        <div class="faq-list">${section.items.map((item, index) => `<article class="faq-item">
+          <h3><button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-answer-${index}"><span${editAttr(`faq.items.${index}.question`)}>${escapeHtml(item.question)}</span><span class="faq-toggle" aria-hidden="true">＋</span></button></h3>
+          <div id="faq-answer-${index}" class="faq-answer-shell"><div class="faq-answer">${item.answer.map((line, lineIndex) => `<p${editAttr(`faq.items.${index}.answer.${lineIndex}`)}>${escapeHtml(line)}</p>`).join("")}${item.subquestion ? `<h4${editAttr(`faq.items.${index}.subquestion`)}>${escapeHtml(item.subquestion)}</h4>` : ""}${item.list.length ? `<ul>${item.list.map((line, lineIndex) => `<li${editAttr(`faq.items.${index}.list.${lineIndex}`)}>${escapeHtml(line)}</li>`).join("")}</ul>` : ""}</div></div>
+        </article>`).join("")}</div>
       </div>
     </section>`;
 
@@ -149,6 +174,52 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js";
     });
   };
 
+  const bindHeader = () => {
+    const header = document.querySelector(".site-header");
+    const button = header?.querySelector(".header-menu-button");
+    const menu = header?.querySelector(".header-mobile-nav");
+    if (!header || !button || !menu) return;
+
+    const closeMenu = (returnFocus = false) => {
+      menu.hidden = true;
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-label", "開啟導覽選單");
+      if (returnFocus) button.focus();
+    };
+
+    button.addEventListener("click", () => {
+      const opening = button.getAttribute("aria-expanded") !== "true";
+      menu.hidden = !opening;
+      button.setAttribute("aria-expanded", String(opening));
+      button.setAttribute("aria-label", opening ? "關閉導覽選單" : "開啟導覽選單");
+      if (opening) menu.querySelector("a")?.focus();
+    });
+    menu.addEventListener("click", (event) => {
+      if (event.target.closest("a")) closeMenu();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !menu.hidden) closeMenu(true);
+    });
+  };
+
+  const bindFaq = () => {
+    const items = [...document.querySelectorAll(".faq-item")];
+    items.forEach((item) => {
+      const button = item.querySelector(".faq-question");
+      button?.addEventListener("click", () => {
+        const opening = button.getAttribute("aria-expanded") !== "true";
+        items.forEach((candidate) => {
+          candidate.classList.remove("is-open");
+          candidate.querySelector(".faq-question")?.setAttribute("aria-expanded", "false");
+        });
+        if (opening) {
+          item.classList.add("is-open");
+          button.setAttribute("aria-expanded", "true");
+        }
+      });
+    });
+  };
+
   const applyMetadata = (meta) => {
     if (document.body.dataset.editor === "true") return;
     document.title = meta.title;
@@ -160,14 +231,17 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js";
   const renderSite = (sourceContent) => {
     const content = prepareEditorContent(sourceContent);
     applyMetadata(content.meta);
-    root.innerHTML = `<main>${renderHero(content)}${renderIntro(content)}${renderPhilosophy(content.philosophy)}${renderPhotographyTypes(content.photographyTypes)}${renderPricingCalculator(content)}<div id="${escapeHtml(content.integrations.featuredWorks.mountId)}" hidden></div><div id="${escapeHtml(content.integrations.recentWorks.mountId)}" hidden></div>${renderFaq(content.faq)}${renderBooking(content)}</main>${renderClosing(content)}`;
+    const hasAnnouncement = Boolean(content.announcement?.enabled && content.announcement.text);
+    root.innerHTML = `${renderAnnouncement(content.announcement)}${renderHeader(content.header, hasAnnouncement)}<main>${renderHero(content)}${renderIntro(content)}${renderPhilosophy(content.philosophy)}${renderPricingCalculator(content)}<div id="${escapeHtml(content.integrations.featuredWorks.mountId)}" hidden></div><div id="${escapeHtml(content.integrations.recentWorks.mountId)}" hidden></div>${renderFaq(content.faq)}${renderBooking(content)}</main>${renderClosing(content)}`;
     bindNavigation();
+    bindHeader();
+    bindFaq();
     initCalculator(document.getElementById(content.integrations.calculator.mountId), content);
     initBookingForm(document.getElementById(content.integrations.bookingForm.mountId), content);
     initEditor();
   };
 
-  fetch(contentUrl)
+  fetch(contentUrl, { cache: "no-store" })
     .then((response) => {
       if (!response.ok) throw new Error(`Content request failed: ${response.status}`);
       return response.json();
