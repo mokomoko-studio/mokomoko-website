@@ -68,7 +68,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js";
 
   const renderPhotographyTypes = (section) => `
     <section class="section light-gray" aria-labelledby="types-title">
-      <div class="content narrow centered">
+      <div class="content default centered">
         <p class="section-kicker">PHOTO SESSION</p>
         <h2 id="types-title" class="section-title"${editAttr("photographyTypes.title")}>${escapeHtml(section.title)}</h2>
         ${renderLines(section.intro, "photographyTypes.intro", "copy-lines section-intro")}
