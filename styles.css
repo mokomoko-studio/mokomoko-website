@@ -14,6 +14,10 @@
   --color-error: #a94040;
   --font-serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --font-sans: "Zen Maru Gothic", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-number: "Fredoka", "Arial Rounded MT Bold", sans-serif;
+  --number-weight: 600;
+  --number-letter-spacing: 0.01em;
+  --number-line-height: 1.1;
   --text-display: clamp(4.25rem, 20vw, 8rem);
   --text-h1: clamp(2.25rem, 8vw, 4.8rem);
   --text-h2: clamp(1.65rem, 5vw, 2.5rem);
@@ -27,15 +31,18 @@
   --space-md: 1.5rem;
   --space-lg: 2.25rem;
   --space-xl: 3.5rem;
-  --space-section: clamp(4.5rem, 14vw, 7rem);
+  --space-section: 96px;
   --space-section-large: clamp(5.5rem, 18vw, 9rem);
-  --space-card: clamp(1.25rem, 4vw, 2rem);
+  --space-card: 24px;
   --page-padding: clamp(1.125rem, 5vw, 2rem);
   --content-max: 1120px;
   --content-narrow: 760px;
-  --radius-card: 18px;
+  --radius-card: 16px;
   --radius-control: 12px;
   --card-gap: clamp(0.875rem, 3vw, 1.5rem);
+  --plan-card-mobile-width: 86%;
+  --carousel-gap: var(--space-sm);
+  --carousel-edge: 2px;
   --control-height: 48px;
   --button-height: 52px;
   --selected-border: 2px solid var(--color-blue-deep);
@@ -455,17 +462,32 @@ ul {
   font-weight: 600;
 }
 
+[data-edit-path="calculator.limitedHeading"] {
+  text-align: center;
+}
+
+[data-edit-path="photographyTypes.items.0.details.1"] {
+  text-align: left;
+}
+
 .plan-card-track {
   display: grid;
-  grid-auto-columns: min(86%, 330px);
+  grid-auto-columns: var(--plan-card-mobile-width);
   grid-auto-flow: column;
-  gap: var(--card-gap);
+  gap: var(--carousel-gap);
   max-width: 100%;
-  padding: 3px 2px 12px;
+  padding: 3px var(--carousel-edge) 12px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  scroll-snap-type: inline mandatory;
-  scrollbar-width: thin;
+  scroll-padding-inline: var(--carousel-edge);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.plan-card-track::-webkit-scrollbar {
+  display: none;
 }
 
 .plan-selector {
@@ -480,6 +502,7 @@ ul {
   background: #fff;
   color: var(--color-ink);
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   text-align: left;
   cursor: pointer;
   transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
@@ -521,12 +544,24 @@ ul {
 }
 
 .plan-price {
-  font-family: var(--font-serif);
+  max-width: 100%;
+  font-family: var(--font-number);
   font-size: var(--text-price);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
+  font-weight: var(--number-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--number-letter-spacing);
+  line-height: var(--number-line-height);
   white-space: nowrap;
+}
+
+.step-number,
+.session-index,
+.counter-control > span {
+  font-family: var(--font-number);
+  font-weight: var(--number-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--number-letter-spacing);
+  line-height: var(--number-line-height);
 }
 
 .plan-description,
@@ -689,6 +724,12 @@ ul {
 
 .breakdown-row b {
   flex: 0 0 auto;
+  font-family: var(--font-number);
+  font-weight: var(--number-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--number-letter-spacing);
+  line-height: var(--number-line-height);
+  white-space: nowrap;
 }
 
 .pricing-total {
@@ -707,9 +748,13 @@ ul {
 
 .pricing-total strong {
   color: var(--color-blue-deep);
-  font-family: var(--font-serif);
+  font-family: var(--font-number);
   font-size: var(--text-price);
-  line-height: 1.1;
+  font-weight: var(--number-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--number-letter-spacing);
+  line-height: var(--number-line-height);
+  white-space: nowrap;
 }
 
 .pricing-summary .primary-button {
@@ -844,8 +889,9 @@ ul {
 
 .booking-field {
   min-width: 0;
+  min-inline-size: 0;
   margin: 0;
-  padding: var(--space-card);
+  padding: clamp(1rem, 5vw, var(--space-card));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   background: #fff;
@@ -857,12 +903,22 @@ ul {
 
 .booking-question {
   display: block;
+  width: 100%;
+  max-width: 100%;
   margin-bottom: var(--space-sm);
+  padding: 0;
   font-weight: 600;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: normal;
 }
 
-.booking-question span {
+.booking-question .required-mark {
+  display: inline;
+  margin-inline-start: 0.15em;
   color: var(--color-error);
+  white-space: nowrap;
 }
 
 .booking-hint,
@@ -874,6 +930,7 @@ ul {
 
 .booking-hint {
   white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .booking-field input[type="text"],
@@ -898,6 +955,7 @@ ul {
 
 .booking-choices {
   gap: 0.4rem;
+  min-width: 0;
 }
 
 .booking-choice {
@@ -905,7 +963,7 @@ ul {
   grid-template-columns: 22px minmax(0, 1fr);
   gap: 0.65rem;
   min-height: 44px;
-  align-items: center;
+  align-items: start;
   padding: 0.45rem 0.6rem;
   border-radius: var(--radius-control);
   cursor: pointer;
@@ -918,8 +976,15 @@ ul {
 .booking-choice input {
   width: 20px;
   height: 20px;
-  margin: 0;
+  margin: 0.2rem 0 0;
   accent-color: var(--color-blue-deep);
+}
+
+.booking-choice span {
+  min-width: 0;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .booking-other {
@@ -1026,6 +1091,12 @@ ul {
   }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --text-price: clamp(2rem, 4.4vw, 2.1rem);
+  }
+}
+
 @media (min-width: 768px) {
   .hero {
     min-height: 830px;
@@ -1047,6 +1118,7 @@ ul {
     grid-auto-flow: row;
     grid-auto-columns: auto;
     overflow: visible;
+    scroll-snap-type: none;
   }
 
   #regularPlans {

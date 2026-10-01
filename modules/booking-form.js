@@ -5,7 +5,7 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>"]/g, (character) 
   '"': "&quot;",
 })[character]);
 
-const renderRequired = (field) => field.required ? ' <span aria-hidden="true">＊</span>' : "";
+const renderRequired = (field) => field.required ? ' <span class="required-mark" aria-hidden="true">＊</span>' : "";
 
 const renderField = (field) => {
   const hint = field.hint ? `<p class="booking-hint">${escapeHtml(field.hint)}</p>` : "";

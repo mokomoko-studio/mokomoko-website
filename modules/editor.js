@@ -106,7 +106,7 @@ export function initEditor() {
 
   const tokenDefinitions = {
     "section-spacing": { property: "--space-section", fallback: 96, unit: "px" },
-    "card-radius": { property: "--radius-card", fallback: 18, unit: "px" },
+    "card-radius": { property: "--radius-card", fallback: 16, unit: "px" },
     "card-padding": { property: "--space-card", fallback: 24, unit: "px" },
     "content-width": { property: "--content-max", fallback: 1120, unit: "px" },
   };
