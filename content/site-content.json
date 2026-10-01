@@ -50,25 +50,29 @@
       "id": "christmas",
       "name": "✧ 特寵／貓｜聖誕寫真收藏",
       "price": 6980,
-      "type": "limited",
-      "allowed": ["cat", "exotic"],
+      "group": "limited",
+      "active": true,
+      "sortOrder": 4,
+      "applicablePetTypes": ["cat", "exotic"],
       "description": "已含基本棚拍場租（多隻毛孩加購、場租時數依拍攝對象另計算）",
       "packageItems": ["10 張精修照片", "40 張調色毛片", "再贈 10 張調色毛片"],
       "packageSummary": "共 60 張攝影作品",
-      "showcase": false
+      "badge": "期間限定"
     },
     {
       "id": "guinea",
       "name": "✧ 天竺鼠｜聖誕聯名收藏組",
       "label": "天天好萌插畫家聯名",
       "price": 7980,
-      "type": "limited",
-      "allowed": ["guinea"],
+      "group": "limited",
+      "active": true,
+      "sortOrder": 5,
+      "applicablePetTypes": ["guinea"],
       "description": "已含基本棚拍場租（多隻毛孩加購、場租時數另計算）",
       "packageItems": ["5 張精修照片", "40 張調色毛片", "3 張客製聖誕插畫電子檔", "3 款(6入) 客製專屬聖誕吊飾", "1 張 天天好萌水晶貼紙"],
       "packageNote": "✧ 3 款天天好萌客製聖誕角色，每款製作 2 個，共 6 個聖誕吊飾！",
       "packageSummary": "共 45 張攝影作品＋3 張客製聖誕插畫電子檔＋7 件實體收藏",
-      "showcase": false
+      "badge": "期間限定"
     },
     {
       "id": "easy",
@@ -76,12 +80,13 @@
       "badge": "基本方案",
       "imageOverlay": "輕鬆體驗",
       "price": 4880,
-      "type": "regular",
-      "allowed": ["dog", "cat", "exotic"],
+      "group": "regular",
+      "active": true,
+      "sortOrder": 1,
+      "applicablePetTypes": ["dog", "cat", "exotic"],
       "description": "包含精修照片 8 張",
       "originalPrice": null,
       "featured": false,
-      "showcase": true,
       "items": ["① 精修照　8 張"],
       "notes": [],
       "image": { "path": "", "alt": "待替換：基本方案橘貓照片", "placeholder": "橘貓照片待替換" }
@@ -92,12 +97,13 @@
       "badge": "最受歡迎",
       "imageOverlay": "CP首選",
       "price": 5980,
-      "type": "regular",
-      "allowed": ["dog", "cat", "exotic"],
+      "group": "regular",
+      "active": true,
+      "sortOrder": 2,
+      "applicablePetTypes": ["dog", "cat", "exotic"],
       "description": "包含精修照片 10 張＋調色毛片 40 張",
       "originalPrice": 6880,
       "featured": true,
-      "showcase": true,
       "items": ["① 精修照　10 張", "② 調色毛片　40 張"],
       "notes": ["＊拍攝時長 1–1.5小時", "＊特寵專屬租棚費折 $200"],
       "image": { "path": "", "alt": "待替換：最受歡迎方案狗狗照片", "placeholder": "狗狗照片待替換" }
@@ -108,12 +114,13 @@
       "badge": "豪華套餐",
       "imageOverlay": "一次到位",
       "price": 8080,
-      "type": "regular",
-      "allowed": ["dog", "cat", "exotic"],
+      "group": "regular",
+      "active": true,
+      "sortOrder": 3,
+      "applicablePetTypes": ["dog", "cat", "exotic"],
       "description": "包含精修照片 15 張＋調色毛片 40 張＋寵生四格照 12 條＋30×30cm 無框畫 1 幅",
       "originalPrice": 9650,
       "featured": false,
-      "showcase": true,
       "items": ["① 精修照　15 張", "② 調色毛片　40 張", "贈　寵生四格照　12 條", "贈　30×30cm 無框畫　1 幅"],
       "notes": [],
       "image": { "path": "", "alt": "待替換：豪華套餐天竺鼠照片", "placeholder": "天竺鼠照片待替換" }
@@ -122,13 +129,13 @@
   "addons": {
     "title": "加購項目",
     "items": [
-      { "id": "color-proofs-40", "name": "40 張調色毛片", "price": 1000 },
-      { "id": "retouched-photo", "name": "單張精修", "price": 500 },
-      { "id": "second-pet", "name": "第 2 隻毛孩", "price": 500 },
-      { "id": "studio-hour", "name": "租借攝影棚每 1 小時", "price": 1000 },
-      { "id": "strip", "name": "12 條寵生四格照", "calculatorName": "寵生四格照 12 條", "price": 500, "calculator": true },
-      { "id": "canvas15", "name": "15×15cm無框畫", "calculatorName": "15×15cm 無框畫", "price": 500, "calculator": true },
-      { "id": "canvas30", "name": "30×30cm無框畫", "calculatorName": "30×30cm 無框畫", "price": 650, "calculator": true }
+      { "id": "color-proofs-40", "name": "40 張調色毛片", "price": 1000, "stage": "post-shoot" },
+      { "id": "retouched-photo", "name": "單張精修", "price": 500, "stage": "post-shoot" },
+      { "id": "second-pet", "name": "第 2 隻毛孩", "price": 500, "stage": "rule" },
+      { "id": "studio-hour", "name": "租借攝影棚每 1 小時", "price": 1000, "stage": "rule" },
+      { "id": "strip", "name": "12 條寵生四格照", "calculatorName": "寵生四格照 12 條", "price": 500, "stage": "booking" },
+      { "id": "canvas15", "name": "15×15cm無框畫", "calculatorName": "15×15cm 無框畫", "price": 500, "stage": "booking" },
+      { "id": "canvas30", "name": "30×30cm無框畫", "calculatorName": "30×30cm 無框畫", "price": 650, "stage": "booking" }
     ],
     "images": [
       { "path": "", "alt": "待替換：寵生四格照商品照片", "placeholder": "寵生四格照照片待替換" },
@@ -175,6 +182,13 @@
         "answer": ["精修包含明暗對比調整、毛髮瑕疵修正、添加眼神光、", "笑容調整、身形比例調整、畫面雜物去除、", "背景光線修正、獨特色彩風格調整；", "而您所額外加購（或方案內含）的調色毛片", "會經由攝影師進行初步裁切與調色"],
         "subquestion": "",
         "list": []
+      },
+      {
+        "id": "post-shoot-addons",
+        "question": "拍攝完成後，還可以加購照片嗎？",
+        "answer": ["可以，拍攝完成後若有更多喜歡的照片，可再依需求加購，不需要在預約時決定。"],
+        "subquestion": "",
+        "list": ["加購精修照片｜NT$500／張", "40 張調色毛片｜NT$1,000／組"]
       }
     ]
   },
@@ -203,8 +217,8 @@
     "lines": ["感謝您的填寫，待攝影師與您討論", "拍攝之地點與時段", "毛孩本身若有特殊狀況，務必提前告知", "匯款後才正式保留拍攝檔期"]
   },
   "calculator": {
-    "title": "⋆⸜ 方案費用試算 ౨ৎ",
-    "subtitle": "慢慢選擇最適合毛孩的拍攝方式，費用會即時為你整理好。",
+    "title": "⋆⸜ 拍攝方案與費用 ౨ৎ",
+    "subtitle": "先選擇喜歡的方案，再依毛孩與拍攝方式即時查看預估費用。",
     "limitedHeading": "11/1-12/10 聖誕室內棚拍（10/31 預約截止）",
     "regularHeading": "常態拍攝方案",
     "species": {
@@ -213,8 +227,6 @@
       "exotic": { "label": "特寵", "max": 4 },
       "guinea": { "label": "天竺鼠", "max": 3 }
     },
-    "extraPetPrice": 500,
-    "studioHourlyPrice": 1000,
     "limitedIncludedHours": 1,
     "rules": [
       "棚拍費用依毛孩數量與預估拍攝時數計算。",
@@ -225,7 +237,7 @@
       "常態方案仍依一般棚拍費 NT$1,000／小時計算。",
       "實際拍攝時間與棚租仍將依毛孩數量及現場狀況，由攝影師確認。"
     ],
-    "reserveLabel": "我要預約"
+    "reserveLabel": "前往預約"
   },
   "bookingForm": {
     "endpoint": "https://docs.google.com/forms/d/e/1FAIpQLSfUT7IxV-mO5zFyVAb08hzvACuDfe3olZ80Co4NhulU3hS8Hg/formResponse",

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MOKOMOKO 網站編輯模式</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="data:,">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600&family=Zen+Maru+Gothic:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="./editor.css">
+    <script type="module" src="../app.js"></script>
+  </head>
+  <body class="editor-page" data-editor="true" data-content-url="../content/site-content.json">
+    <div class="editor-shell">
+      <div class="editor-preview" aria-label="網站預覽">
+        <div id="site-root"><main class="section centered"><p>網站內容載入中…</p></main></div>
+      </div>
+      <aside id="editor-inspector" class="editor-inspector" aria-label="編輯設定"></aside>
+    </div>
+    <noscript><p>此編輯模式需要 JavaScript。</p></noscript>
+  </body>
+</html>

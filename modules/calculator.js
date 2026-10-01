@@ -1,4 +1,4 @@
-const money = (amount) => `NT$${amount.toLocaleString("zh-TW")}`;
+import { createPricingEngine } from "./pricing-engine.js";
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>"]/g, (character) => ({
   "&": "&amp;",
@@ -7,188 +7,139 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>"]/g, (character) 
   '"': "&quot;",
 })[character]);
 
+const editable = (path) => `data-edit-path="${escapeHtml(path)}"`;
+
 export function initCalculator(root, content) {
   if (!root || !content.integrations.calculator.enabled) return;
 
-  const calculator = content.calculator;
-  const plans = Object.fromEntries(content.plans.map((plan) => [plan.id, plan]));
-  const speciesInfo = calculator.species;
-  const products = content.addons.items
-    .filter((item) => item.calculator)
-    .map((item) => ({ ...item, name: item.calculatorName || item.name }));
+  const engine = createPricingEngine(content);
+  const plans = Object.values(engine.plans).sort((a, b) => a.sortOrder - b.sortOrder);
   const state = {
     plan: null,
     species: null,
     count: 1,
     environment: null,
-    products: Object.fromEntries(products.map((product) => [product.id, 0])),
+    products: Object.fromEntries(engine.bookingAddons.map((addon) => [addon.id, 0])),
   };
-  const currentPlan = () => state.plan ? plans[state.plan] : null;
 
   root.innerHTML = `
-    <div class="calculator-grid">
-      <div class="calculator-steps">
-        <section class="calculator-card">
-          <h3><span>1</span> 選擇拍攝方案</h3>
-          <p class="module-helper">請先選擇一個拍攝方案。</p>
-          <p class="calculator-group-heading">${escapeHtml(calculator.limitedHeading)}</p>
-          <div id="limitedPlans" class="calculator-choice-list" role="radiogroup" aria-label="期間限定拍攝方案"></div>
-          <p class="calculator-group-heading">${escapeHtml(calculator.regularHeading)}</p>
-          <div id="regularPlans" class="calculator-choice-list" role="radiogroup" aria-label="常態拍攝方案"></div>
-          <p id="planValidation" class="module-error" aria-live="polite"></p>
-        </section>
+    <div class="pricing-flow">
+      <section class="pricing-step pricing-plan-step" aria-labelledby="plan-step-title">
+        <div class="step-heading">
+          <span class="step-number">01</span>
+          <div><h3 id="plan-step-title">選擇拍攝方案</h3><p>方案本身就是價目表，點選後會顯示適用的拍攝對象與費用條件。</p></div>
+        </div>
+        <div class="plan-group">
+          <p class="plan-group-title" ${editable("calculator.regularHeading")}>${escapeHtml(content.calculator.regularHeading)}</p>
+          <div id="regularPlans" class="plan-card-track" role="radiogroup" aria-label="常態拍攝方案"></div>
+        </div>
+        <div class="plan-group">
+          <p class="plan-group-title" ${editable("calculator.limitedHeading")}>${escapeHtml(content.calculator.limitedHeading)}</p>
+          <div id="limitedPlans" class="plan-card-track" role="radiogroup" aria-label="期間限定拍攝方案"></div>
+        </div>
+      </section>
 
-        <section class="calculator-card">
-          <h3><span>2</span> 選擇毛孩</h3>
-          <p class="module-helper">請選擇毛孩種類，再調整拍攝隻數。</p>
-          <div id="speciesChoices" class="calculator-species" role="radiogroup" aria-label="毛孩種類" hidden></div>
-          <p id="speciesValidation" class="module-error" aria-live="polite"></p>
-          <div id="animalCounters"></div>
-        </section>
+      <section id="petStep" class="pricing-step" aria-labelledby="pet-step-title" hidden>
+        <div class="step-heading">
+          <span class="step-number">02</span>
+          <div><h3 id="pet-step-title">拍攝對象</h3><p>只顯示目前方案適用的毛孩類型。</p></div>
+        </div>
+        <div id="speciesChoices" class="species-controls" role="radiogroup" aria-label="拍攝對象"></div>
+      </section>
 
-        <section class="calculator-card">
-          <h3><span>3</span> 拍攝環境與棚拍費</h3>
-          <ul class="calculator-rules">${calculator.rules.map((rule) => `<li>${escapeHtml(rule)}</li>`).join("")}</ul>
-          <div id="environmentChoices" class="calculator-choice-list" role="radiogroup" aria-label="拍攝環境"></div>
+      <section id="conditionStep" class="pricing-step" aria-labelledby="condition-step-title" hidden>
+        <div class="step-heading">
+          <span class="step-number">03</span>
+          <div><h3 id="condition-step-title">數量與拍攝條件</h3><p>依毛孩數量與拍攝環境計算適用費用。</p></div>
+        </div>
+        <div id="animalCounters"></div>
+        <div id="environmentBlock" class="condition-block">
+          <h4>拍攝環境</h4>
+          <div id="environmentChoices" class="environment-controls" role="radiogroup" aria-label="拍攝環境"></div>
           <p id="environmentNote" class="module-note" aria-live="polite"></p>
-          <p id="environmentValidation" class="module-error" aria-live="polite"></p>
-        </section>
+        </div>
+        <details class="pricing-rules">
+          <summary>查看棚拍與時數計算說明</summary>
+          <ul>${content.calculator.rules.map((rule, index) => `<li ${editable(`calculator.rules.${index}`)}>${escapeHtml(rule)}</li>`).join("")}</ul>
+        </details>
+      </section>
 
-        <section class="calculator-card">
-          <h3><span>4</span> 實體商品加購</h3>
-          <p class="module-helper">數量填寫 0 即表示不加購。</p>
-          <div id="productCounters"></div>
-        </section>
-      </div>
+      <section id="addonStep" class="pricing-step" aria-labelledby="addon-step-title" hidden>
+        <div class="step-heading">
+          <span class="step-number">04</span>
+          <div><h3 id="addon-step-title">預約階段加購</h3><p>只有會影響本次預估費用的商品會列在這裡。</p></div>
+        </div>
+        <div id="productCounters"></div>
+      </section>
 
-      <aside class="calculator-card calculator-summary" aria-label="費用明細">
-        <h3><span>5</span> 費用明細</h3>
-        <div id="breakdown" class="calculator-breakdown" aria-live="polite"></div>
-        <p id="completionNotice" class="module-note" aria-live="polite"></p>
-        <div class="calculator-total"><span>預估總額</span><strong id="totalAmount" aria-live="polite">NT$0</strong></div>
-        <p class="module-helper">此為線上費用試算。期間限定方案已包含基本棚租；一般棚拍費與最終拍攝安排，將依實際內容由 MOKOMOKO 確認後為準。</p>
-        <a id="reserveButton" class="module-button" href="#booking-form-section">${escapeHtml(calculator.reserveLabel)}</a>
+      <aside id="summaryStep" class="pricing-summary" aria-labelledby="summary-title" hidden>
+        <div class="step-heading">
+          <span class="step-number">05</span>
+          <div><h3 id="summary-title">費用明細</h3><p id="completionNotice" aria-live="polite"></p></div>
+        </div>
+        <div id="breakdown" class="pricing-breakdown" aria-live="polite"></div>
+        <div class="pricing-total"><span>預估總額</span><strong id="totalAmount" aria-live="polite">NT$0</strong></div>
+        <p class="module-note">此為線上費用試算，最終拍攝安排與金額將由 MOKOMOKO 確認。</p>
+        <a id="reserveButton" class="primary-button is-disabled" href="#booking-form-section" aria-disabled="true">${escapeHtml(content.calculator.reserveLabel)}</a>
       </aside>
     </div>`;
 
-  const planCard = (plan) => `
-    <button type="button" class="calculator-choice plan-card" data-plan="${escapeHtml(plan.id)}" role="radio" aria-checked="false">
-      <span class="calculator-radio" aria-hidden="true"></span>
-      <span class="calculator-choice-copy">
-        <strong>${escapeHtml(plan.name)}</strong>
-        ${plan.label ? `<small>${escapeHtml(plan.label)}</small>` : ""}
-        <b>${money(plan.price)}</b>
-        <span>${escapeHtml(plan.description)}</span>
-        ${plan.packageItems ? `<span class="calculator-package">${plan.packageItems.map((item) => `<i>${escapeHtml(item)}</i>`).join("")}</span>` : ""}
-        ${plan.packageNote ? `<em>${escapeHtml(plan.packageNote)}</em>` : ""}
-        ${plan.packageSummary ? `<u>${escapeHtml(plan.packageSummary)}</u>` : ""}
+  const planFeatures = (plan) => plan.packageItems || plan.items || [];
+  const planCard = (plan) => {
+    const planIndex = content.plans.findIndex((item) => item.id === plan.id);
+    const path = `plans.${planIndex}`;
+    const featureKey = plan.packageItems ? "packageItems" : "items";
+    return `<button type="button" class="plan-selector" data-plan="${escapeHtml(plan.id)}" role="radio" aria-checked="false">
+      <span class="plan-card-top">
+        <span class="plan-name" ${editable(`${path}.name`)}>${escapeHtml(plan.name)}</span>
+        ${plan.badge ? `<span class="plan-badge" ${editable(`${path}.badge`)}>${escapeHtml(plan.badge)}</span>` : ""}
       </span>
+      <span class="plan-price">${engine.formatMoney(plan.price)}</span>
+      <span class="plan-description" ${editable(`${path}.description`)}>${escapeHtml(plan.description)}</span>
+      ${planFeatures(plan).length ? `<span class="plan-features">${planFeatures(plan).map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>` : ""}
+      ${plan.packageNote ? `<span class="plan-note" ${editable(`${path}.packageNote`)}>${escapeHtml(plan.packageNote)}</span>` : ""}
     </button>`;
-
-  const renderStaticChoices = () => {
-    const entries = Object.values(plans);
-    root.querySelector("#limitedPlans").innerHTML = entries.filter((plan) => plan.type === "limited").map(planCard).join("");
-    root.querySelector("#regularPlans").innerHTML = entries.filter((plan) => plan.type === "regular").map(planCard).join("");
-    root.querySelector("#speciesChoices").innerHTML = Object.entries(speciesInfo).map(([key, info]) => `
-      <button type="button" class="calculator-species-choice" data-species="${key}" role="radio" aria-checked="false">${escapeHtml(info.label)}</button>`).join("");
   };
 
-  const requiresEnvironmentChoice = () => {
-    const plan = currentPlan();
-    return Boolean(plan && plan.type === "regular" && ["cat", "exotic"].includes(state.species));
-  };
+  root.querySelector("#regularPlans").innerHTML = plans.filter((plan) => plan.group === "regular").map(planCard).join("");
+  root.querySelector("#limitedPlans").innerHTML = plans.filter((plan) => plan.group === "limited").map(planCard).join("");
+  root.querySelector("#speciesChoices").innerHTML = Object.entries(engine.species).map(([key, info]) => `
+    <button type="button" class="text-control" data-species="${key}" role="radio" aria-checked="false">${escapeHtml(info.label)}</button>`).join("");
 
-  const getStudioHours = () => {
-    if (!state.species || !state.count) return 0;
-    if (state.species === "cat") return 2;
-    if (["exotic", "guinea"].includes(state.species)) {
-      if (state.count <= 2) return 1;
-      if (state.count === 3) return 1.5;
-      return 2;
-    }
-    if (state.species === "dog") {
-      if (state.count === 1) return 1;
-      if (state.count === 2) return 1.5;
-      return 2;
-    }
-    return 0;
-  };
+  const currentPlan = () => engine.getPlan(state.plan);
 
-  const calculate = () => {
-    const lines = [];
-    let total = 0;
-    const plan = currentPlan();
-    if (plan) {
-      lines.push({ name: plan.name, summary: plan.packageSummary || "", amount: plan.price, base: true });
-      total += plan.price;
-    }
-    if (plan && state.species && state.count > 1) {
-      const petFee = (state.count - 1) * calculator.extraPetPrice;
-      lines.push({ name: `毛孩加價（第 2–${state.count} 隻）`, amount: petFee });
-      total += petFee;
-    }
-    if (plan && state.species) {
-      if (plan.type === "regular" && state.environment === "indoor") {
-        const hours = getStudioHours();
-        const studioFee = hours * calculator.studioHourlyPrice;
-        lines.push({ name: `攝影棚費（預估 ${hours} 小時 × ${money(calculator.studioHourlyPrice)}）`, amount: studioFee });
-        total += studioFee;
-      }
-      if (plan.type === "regular" && state.environment === "outdoor" && state.species !== "dog") {
-        lines.push({ name: "攝影棚費（戶外拍攝）", amount: 0 });
-      }
-      if (plan.type === "limited") {
-        const hours = getStudioHours();
-        const extraFee = Math.max(0, hours - calculator.limitedIncludedHours) * calculator.studioHourlyPrice;
-        lines.push({ name: "期間限定方案已含 1 小時棚租", amount: 0 });
-        lines.push({ name: `額外棚拍費（${hours} 小時－已含 1 小時）`, amount: extraFee });
-        total += extraFee;
-      }
-    }
-    products.forEach((product) => {
-      const quantity = state.products[product.id];
-      if (quantity > 0) {
-        const amount = product.price * quantity;
-        lines.push({ name: `${product.name} × ${quantity}`, amount });
-        total += amount;
-      }
-    });
-    return { lines, total };
-  };
-
-  const selectPlan = (planKey) => {
-    state.plan = planKey;
-    const selectedPlan = plans[planKey];
-    if (planKey === "guinea") {
+  const selectPlan = (planId) => {
+    const plan = engine.getPlan(planId);
+    if (!plan) return;
+    state.plan = planId;
+    if (planId === "guinea") {
       state.species = "guinea";
       state.count = 1;
       state.environment = "indoor";
-    } else if (!selectedPlan.allowed.includes(state.species)) {
+    } else if (!plan.applicablePetTypes.includes(state.species)) {
       state.species = null;
       state.count = 1;
       state.environment = null;
-    } else if (selectedPlan.type === "limited") {
+    } else if (plan.group === "limited") {
       state.environment = "indoor";
-    } else if (state.species === "dog") {
-      state.environment = "outdoor";
     } else {
-      state.environment = null;
+      state.environment = state.species === "dog" ? "outdoor" : null;
     }
     render();
   };
 
-  const selectSpecies = (speciesKey) => {
+  const selectSpecies = (speciesId) => {
     const plan = currentPlan();
-    if (!plan || !plan.allowed.includes(speciesKey)) return;
-    state.species = speciesKey;
+    if (!plan?.applicablePetTypes.includes(speciesId)) return;
+    state.species = speciesId;
     state.count = 1;
-    state.environment = plan.type === "limited" ? "indoor" : speciesKey === "dog" ? "outdoor" : null;
+    state.environment = plan.group === "limited" ? "indoor" : speciesId === "dog" ? "outdoor" : null;
     render();
   };
 
   const changePetCount = (delta) => {
     if (!state.species) return;
-    state.count = Math.max(1, Math.min(speciesInfo[state.species].max, state.count + delta));
+    state.count = Math.max(1, Math.min(engine.species[state.species].max, state.count + delta));
     render();
   };
 
@@ -197,85 +148,79 @@ export function initCalculator(root, content) {
     render();
   };
 
-  const renderAnimalCounter = () => {
-    const holder = root.querySelector("#animalCounters");
-    if (!state.species) {
-      holder.innerHTML = "";
-      return;
-    }
-    const info = speciesInfo[state.species];
-    holder.innerHTML = `<div class="calculator-counter-row"><div><strong>${escapeHtml(info.label)}數量</strong><p>最少 1 隻，最多 ${info.max} 隻</p></div><div class="calculator-counter"><button type="button" data-count-delta="-1" aria-label="減少${escapeHtml(info.label)}數量" ${state.count <= 1 ? "disabled" : ""}>−</button><span>${state.count}</span><button type="button" data-count-delta="1" aria-label="增加${escapeHtml(info.label)}數量" ${state.count >= info.max ? "disabled" : ""}>＋</button></div></div>`;
-  };
-
-  const renderEnvironment = () => {
+  const renderConditions = () => {
+    const info = engine.species[state.species];
+    root.querySelector("#animalCounters").innerHTML = `<div class="counter-row">
+      <div><strong>${escapeHtml(info.label)}數量</strong><p>最少 1 隻，最多 ${info.max} 隻</p></div>
+      <div class="counter-control"><button type="button" data-count-delta="-1" aria-label="減少${escapeHtml(info.label)}數量" ${state.count <= 1 ? "disabled" : ""}>−</button><span aria-live="polite">${state.count}</span><button type="button" data-count-delta="1" aria-label="增加${escapeHtml(info.label)}數量" ${state.count >= info.max ? "disabled" : ""}>＋</button></div>
+    </div>`;
     const holder = root.querySelector("#environmentChoices");
     const note = root.querySelector("#environmentNote");
     const plan = currentPlan();
-    if (!plan || !state.species) {
-      holder.innerHTML = "";
-      note.textContent = "請先完成拍攝方案與毛孩種類選擇。";
-      return;
-    }
-    if (plan.type === "limited") {
-      state.environment = "indoor";
-      holder.innerHTML = '<div class="calculator-choice is-selected"><strong>室內棚拍</strong><span>期間限定方案已包含基本棚租，僅依方案規則計算特殊數量加價。</span></div>';
-      note.textContent = "期間限定方案已包含 1 小時基本棚租；超出時數依一般棚拍費計算。";
+    if (plan.group === "limited") {
+      holder.innerHTML = '<div class="condition-value"><strong>室內棚拍</strong><span>此活動方案已包含 1 小時基本棚租。</span></div>';
+      note.textContent = "超出已含時數時，會依原計價規則加收棚拍費。";
       return;
     }
     if (state.species === "dog") {
-      state.environment = "outdoor";
-      holder.innerHTML = '<div class="calculator-choice is-selected"><strong>戶外拍攝</strong><span>一般狗狗方案維持戶外拍攝，攝影棚費為 NT$0。</span></div>';
-      note.textContent = "狗狗戶外拍攝不加攝影棚費。";
+      holder.innerHTML = '<div class="condition-value"><strong>戶外拍攝</strong><span>狗狗常態方案不加攝影棚費。</span></div>';
+      note.textContent = "";
       return;
     }
     holder.innerHTML = ["outdoor", "indoor"].map((environment) => {
       const selected = state.environment === environment;
-      const title = environment === "outdoor" ? "戶外拍攝" : "室內棚拍";
-      const detail = environment === "outdoor" ? "不加攝影棚費。" : "依毛孩數量與預估拍攝時數計算棚拍費。";
-      return `<button type="button" data-environment="${environment}" class="calculator-choice ${selected ? "is-selected" : ""}" role="radio" aria-checked="${selected}"><strong>${title}</strong><span>${detail}</span></button>`;
+      return `<button type="button" class="text-control ${selected ? "is-selected" : ""}" data-environment="${environment}" role="radio" aria-checked="${selected}">${environment === "outdoor" ? "戶外拍攝" : "室內棚拍"}</button>`;
     }).join("");
-    note.textContent = state.environment === "indoor" ? "已選擇室內棚拍，費用明細將列出預估時數與棚拍費。" : state.environment === "outdoor" ? "已選擇戶外拍攝，不加攝影棚費。" : "請選擇拍攝環境以完成費用試算。";
+    note.textContent = state.environment === "indoor" ? "棚拍費將依預估拍攝時數計入明細。" : state.environment === "outdoor" ? "戶外拍攝不加攝影棚費。" : "請選擇拍攝環境。";
   };
 
   const renderProducts = () => {
-    root.querySelector("#productCounters").innerHTML = products.map((product) => {
-      const quantity = state.products[product.id];
-      return `<div class="calculator-counter-row"><div><strong>${escapeHtml(product.name)}</strong><p>每份 +${money(product.price)}｜填寫 0 即表示不加購</p></div><div class="calculator-counter"><button type="button" data-product="${product.id}" data-product-delta="-1" aria-label="減少${escapeHtml(product.name)}" ${quantity <= 0 ? "disabled" : ""}>−</button><span>${quantity}</span><button type="button" data-product="${product.id}" data-product-delta="1" aria-label="增加${escapeHtml(product.name)}">＋</button></div></div>`;
+    root.querySelector("#productCounters").innerHTML = engine.bookingAddons.map((addon) => {
+      const quantity = state.products[addon.id];
+      return `<div class="counter-row">
+        <div><strong>${escapeHtml(addon.calculatorName || addon.name)}</strong><p>每份 ${engine.formatMoney(addon.price)}，0 表示不加購</p></div>
+        <div class="counter-control"><button type="button" data-product="${addon.id}" data-product-delta="-1" aria-label="減少${escapeHtml(addon.name)}" ${quantity <= 0 ? "disabled" : ""}>−</button><span aria-live="polite">${quantity}</span><button type="button" data-product="${addon.id}" data-product-delta="1" aria-label="增加${escapeHtml(addon.name)}">＋</button></div>
+      </div>`;
     }).join("");
   };
 
   const renderSummary = () => {
-    const result = calculate();
-    root.querySelector("#breakdown").innerHTML = result.lines.length === 0
-      ? "<p>請先選擇拍攝方案，費用會在這裡即時整理。</p>"
-      : result.lines.map((line) => `<div><span><b>${escapeHtml(line.name)}</b>${line.summary ? `<small>${escapeHtml(line.summary)}</small>` : ""}</span><strong>${line.base ? money(line.amount) : line.amount === 0 ? "NT$0" : `+${money(line.amount)}`}</strong></div>`).join("");
-    root.querySelector("#totalAmount").textContent = money(result.total);
-    const complete = Boolean(state.plan && state.species && !(requiresEnvironmentChoice() && !state.environment));
-    root.querySelector("#completionNotice").textContent = complete ? "必填欄位已完成，您可查看完整預估費用。" : "完成拍攝方案、毛孩與環境選擇後即可查看完整費用。";
-    root.querySelector("#planValidation").textContent = state.plan ? "" : "請選擇一個拍攝方案。";
-    root.querySelector("#speciesValidation").textContent = state.plan && !state.species ? "請選擇毛孩種類與數量。" : "";
-    root.querySelector("#environmentValidation").textContent = requiresEnvironmentChoice() && !state.environment ? "請選擇拍攝環境。" : "";
+    const result = engine.calculate(state);
+    root.querySelector("#breakdown").innerHTML = result.lines.map((line) => `
+      <div class="breakdown-row">
+        <span><strong>${escapeHtml(line.label)}</strong>${line.detail ? `<small>${escapeHtml(line.detail)}</small>` : ""}</span>
+        <b>${line.kind === "included" ? "已包含" : `${line.kind === "base" ? "" : "+"}${engine.formatMoney(line.amount)}`}</b>
+      </div>`).join("");
+    root.querySelector("#totalAmount").textContent = engine.formatMoney(result.total);
+    root.querySelector("#completionNotice").textContent = result.complete ? "試算已完成，可前往填寫預約資料。" : "完成必要選項後即可前往預約。";
+    const reserve = root.querySelector("#reserveButton");
+    reserve.classList.toggle("is-disabled", !result.complete);
+    reserve.setAttribute("aria-disabled", String(!result.complete));
   };
 
   const render = () => {
     const plan = currentPlan();
-    root.querySelectorAll(".plan-card").forEach((element) => {
-      const selected = element.dataset.plan === state.plan;
-      element.classList.toggle("is-selected", selected);
-      element.setAttribute("aria-checked", String(selected));
+    root.querySelectorAll("[data-plan]").forEach((button) => {
+      const selected = button.dataset.plan === state.plan;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-checked", String(selected));
     });
-    root.querySelectorAll(".calculator-species-choice").forEach((element) => {
-      const allowed = Boolean(plan && plan.allowed.includes(element.dataset.species));
-      const selected = element.dataset.species === state.species;
-      element.hidden = !allowed;
-      element.classList.toggle("is-selected", selected);
-      element.setAttribute("aria-checked", String(selected));
+    root.querySelectorAll("[data-species]").forEach((button) => {
+      const allowed = Boolean(plan?.applicablePetTypes.includes(button.dataset.species));
+      const selected = button.dataset.species === state.species;
+      button.hidden = !allowed;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-checked", String(selected));
     });
-    root.querySelector("#speciesChoices").hidden = !plan;
-    renderAnimalCounter();
-    renderEnvironment();
-    renderProducts();
-    renderSummary();
+    root.querySelector("#petStep").hidden = !plan;
+    root.querySelector("#conditionStep").hidden = !state.species;
+    root.querySelector("#addonStep").hidden = !state.species;
+    root.querySelector("#summaryStep").hidden = !plan;
+    if (state.species) {
+      renderConditions();
+      renderProducts();
+    }
+    if (plan) renderSummary();
   };
 
   root.addEventListener("click", (event) => {
@@ -295,7 +240,10 @@ export function initCalculator(root, content) {
     if (productButton) changeProductCount(productButton.dataset.product, Number(productButton.dataset.productDelta));
   });
 
-  renderStaticChoices();
+  root.querySelector("#reserveButton").addEventListener("click", (event) => {
+    if (event.currentTarget.getAttribute("aria-disabled") === "true") event.preventDefault();
+  });
+
   render();
-  window.__MOKOMOKO_CALCULATOR__ = { state, calculate, selectPlan, selectSpecies, changePetCount, changeProductCount };
+  window.__MOKOMOKO_CALCULATOR__ = { state, engine, selectPlan, selectSpecies, changePetCount, changeProductCount };
 }
