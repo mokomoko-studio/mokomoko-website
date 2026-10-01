@@ -244,12 +244,13 @@
     "eyebrow": "MOKOMOKO PET PHOTOGRAPHY",
     "fields": [
       { "key": "pet-name", "type": "text", "label": "❶ 毛孩暱稱", "name": "entry.1663111275", "required": true, "error": "請填寫毛孩暱稱。" },
-      { "key": "pet-type", "type": "radio", "label": "❷ 毛孩品種", "name": "entry.1815331256", "required": true, "error": "請選擇毛孩品種。", "options": ["狗狗（戶外）", "貓貓（戶外/室內棚拍）", "天竺鼠（特寵須室內棚拍）", "兔子（特寵須室內棚拍）", "爬蟲（特寵須室內棚拍）"], "other": { "name": "entry.1815331256.other_option_response", "placeholder": "請填寫毛孩品種", "control": "input" } },
-      { "key": "age", "type": "select", "label": "❸ 歲數", "name": "entry.1286144081", "required": true, "error": "請選擇毛孩歲數。", "placeholder": "請選擇", "options": ["0（11個月內)", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16以上"] },
-      { "key": "notes", "type": "radio", "label": "❸ 備註", "hint": "如不落地、全程牽繩、對陌生人敏感、不理解指令", "name": "entry.622904434", "required": true, "error": "請選擇或填寫備註。", "options": ["無"], "other": { "name": "entry.622904434.other_option_response", "placeholder": "請填寫備註", "control": "textarea" } },
-      { "key": "instagram", "type": "text", "label": "❹ 飼主 Instagram 帳號", "hint": "請如實填寫正確 ID。", "name": "entry.1343958423", "required": true, "error": "請填寫飼主 Instagram 帳號。" },
-      { "key": "source", "type": "radio", "label": "❺ 請問您是透過什麼平台認識 𝐌𝐎𝐊𝐎𝐌𝐎𝐊𝐎 呢？", "hint": "感謝答覆，這對我們來說非常重要ꜝꜝ", "name": "entry.474112390", "required": true, "error": "請選擇認識 MOKOMOKO 的平台。", "options": ["從 Instagram 廣告看到我們的！", "從 Threads 貼文看到我們的！", "曾體驗過我們拍攝的親友推薦的！", "無意間在 IG Reels 上滑到的！"], "other": { "name": "entry.474112390.other_option_response", "placeholder": "請填寫平台", "control": "input" } },
-      { "key": "confirmation", "type": "radio", "label": "感謝預約，這幾天攝影師會主動聯繫您，再麻煩請幫我留意IG陌生訊息哦！", "name": "entry.1086373769", "required": true, "error": "請確認已瞭解聯繫方式。", "options": ["我已瞭解！"] }
+      { "key": "pet-kind", "type": "radio", "label": "❷ 毛孩種類", "name": "entry.1815331256", "required": true, "error": "請選擇毛孩種類。", "options": ["狗狗（戶外）", "貓貓（戶外／室內棚拍）", "天竺鼠（室內棚拍）", "兔子（室內棚拍）", "爬蟲（室內棚拍）"], "other": { "name": "entry.1815331256.other_option_response", "placeholder": "請填寫其他毛孩種類", "control": "input" } },
+      { "key": "pet-breed", "type": "text", "label": "❸ 毛孩品種", "hint": "例如：米克斯、柴犬、英短 ⋯⋯", "name": "entry.74414454", "required": false, "error": "" },
+      { "key": "pet-age", "type": "select", "label": "❹ 毛孩年紀", "name": "entry.1286144081", "required": true, "error": "請選擇毛孩年紀。", "placeholder": "請選擇", "options": ["未滿 1 歲", "1 歲", "2 歲", "3 歲", "4 歲", "5 歲", "6 歲", "7 歲", "8 歲", "9 歲", "10 歲", "11 歲", "12 歲", "13 歲", "14 歲", "15 歲", "16 歲以上", "不確定"] },
+      { "key": "notes", "type": "textarea", "label": "❺ 備註", "hint": "如不落地、全程牽繩、對陌生人敏感、不理解指令。", "name": "entry.622904434", "required": false, "error": "" },
+      { "key": "instagram", "type": "text", "label": "❻ 飼主 Instagram 帳號", "hint": "請如實填寫正確ID。", "name": "entry.1343958423", "required": true, "error": "請填寫飼主 Instagram 帳號。" },
+      { "key": "source", "type": "radio", "label": "❼ 請問您是透過什麼平台認識 𝐌𝐎𝐊𝐎𝐌𝐎𝐊𝐎 呢？", "hint": "感謝回答，這對我們來說非常重要ꜝꜝ", "name": "entry.474112390", "required": true, "error": "請選擇認識 MOKOMOKO 的平台。", "options": ["Instagram 廣告", "Instagram 貼文／Reels", "Threads", "Google 搜尋", "親友推薦", "曾經拍攝過，是老朋友回來啦！", "合作店家／品牌推薦"], "other": { "name": "entry.474112390.other_option_response", "placeholder": "請填寫其他來源", "control": "input" } },
+      { "key": "booking-confirmation", "type": "checkbox", "label": "❽ 預約須知確認", "hint": "本次拍攝之作品，MOKOMOKO 得使用於官方網站、社群平台、作品展示及品牌宣傳用途。\n若不希望本人或同行者之正臉照片公開於網路平台，\n請於拍攝前主動告知；不影響正常拍攝。", "name": "entry.1086373769", "required": true, "error": "請勾選預約須知確認。", "options": ["我已閱讀並同意上述作品使用方式，", "並了解送出表單後，須完成後續聯繫流程才算預約成立。"] }
     ],
     "submitLabel": "送出預約資料",
     "submittingLabel": "送出中…",

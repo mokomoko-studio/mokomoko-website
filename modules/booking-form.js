@@ -11,10 +11,10 @@ const renderField = (field) => {
   const hint = field.hint ? `<p class="booking-hint">${escapeHtml(field.hint)}</p>` : "";
   const error = `<p class="booking-error" id="${field.key}-error" aria-live="polite"></p>`;
 
-  if (field.type === "text") {
+  if (field.type === "text" || field.type === "textarea") {
     return `<div class="booking-field" data-field="${field.key}">
       <label class="booking-question" for="${field.key}">${escapeHtml(field.label)}${renderRequired(field)}</label>
-      ${hint}<input id="${field.key}" name="${field.name}" type="text" autocomplete="off" ${field.required ? "required" : ""}>${error}
+      ${hint}${field.type === "textarea" ? `<textarea id="${field.key}" name="${field.name}" rows="4" ${field.required ? "required" : ""}></textarea>` : `<input id="${field.key}" name="${field.name}" type="text" autocomplete="off" ${field.required ? "required" : ""}` + `>`}${error}
     </div>`;
   }
 
@@ -25,7 +25,8 @@ const renderField = (field) => {
     </div>`;
   }
 
-  const options = field.options.map((option, index) => `<label class="booking-choice"><input type="radio" name="${field.name}" value="${escapeHtml(option)}" ${field.required && index === 0 ? "required" : ""}><span>${escapeHtml(option)}</span></label>`).join("");
+  const choiceType = field.type === "checkbox" ? "checkbox" : "radio";
+  const options = field.options.map((option) => `<label class="booking-choice"><input type="${choiceType}" name="${field.name}" value="${escapeHtml(option)}"><span>${escapeHtml(option)}</span></label>`).join("");
   const otherId = `${field.key}-other`;
   const other = field.other ? `<label class="booking-choice"><input type="radio" name="${field.name}" value="__other_option__" data-other-target="${otherId}"><span>其他</span></label>${field.other.control === "textarea" ? `<textarea class="booking-other" id="${otherId}" name="${field.other.name}" rows="3" placeholder="${escapeHtml(field.other.placeholder)}" aria-label="${escapeHtml(field.other.placeholder)}" disabled></textarea>` : `<input class="booking-other" id="${otherId}" name="${field.other.name}" type="text" placeholder="${escapeHtml(field.other.placeholder)}" aria-label="${escapeHtml(field.other.placeholder)}" disabled>`}` : "";
   return `<fieldset class="booking-field" data-field="${field.key}">
@@ -62,7 +63,7 @@ export function initBookingForm(root, content) {
 
   const rules = config.fields.filter((field) => field.required).map((field) => ({
     ...field,
-    selector: field.type === "radio" ? `input[name="${field.name}"]:checked` : `#${field.key}`,
+    selector: ["radio", "checkbox"].includes(field.type) ? `input[name="${field.name}"]:checked` : `#${field.key}`,
     otherSelector: field.other ? `#${field.key}-other` : null,
   }));
 
@@ -132,7 +133,7 @@ export function initBookingForm(root, content) {
       submitButton.disabled = false;
       submitButton.textContent = config.submitLabel;
       form.removeAttribute("aria-busy");
-      setFieldError("confirmation", "目前無法確認送出結果，請檢查網路後再試一次。");
+      setFieldError(config.fields.at(-1)?.key, "目前無法確認送出結果，請檢查網路後再試一次。");
     }, 15000);
   });
 

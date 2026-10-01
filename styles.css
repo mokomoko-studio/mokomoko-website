@@ -872,6 +872,10 @@ ul {
   font-size: var(--text-small);
 }
 
+.booking-hint {
+  white-space: pre-line;
+}
+
 .booking-field input[type="text"],
 .booking-field select,
 .booking-field textarea {
