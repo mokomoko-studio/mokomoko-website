@@ -719,20 +719,6 @@ ul {
   display: none;
 }
 
-@media (max-width: 767px) {
-  #regularPlans [data-plan="luxury"] {
-    order: 1;
-  }
-
-  #regularPlans [data-plan="easy"] {
-    order: 2;
-  }
-
-  #regularPlans [data-plan="cp"] {
-    order: 3;
-  }
-}
-
 .plan-selector {
   display: flex;
   min-width: 0;

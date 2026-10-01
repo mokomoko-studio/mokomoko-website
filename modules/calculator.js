@@ -110,7 +110,7 @@ export function initCalculator(root, content) {
 
   const centerInitialPlan = () => {
     if (!window.matchMedia("(max-width: 767px)").matches || carouselInteracted || state.plan) return;
-    const card = root.querySelector('[data-plan="easy"]');
+    const card = root.querySelector('[data-plan="cp"]');
     const track = card?.closest(".plan-card-track");
     if (!card || !track) return;
     const cardRect = card.getBoundingClientRect();

@@ -1,6 +1,6 @@
-import { initCalculator } from "./modules/calculator.js?v=mobile-refinement-2";
-import { initBookingForm } from "./modules/booking-form.js?v=mobile-refinement-2";
-import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-refinement-2";
+import { initCalculator } from "./modules/calculator.js?v=mobile-refinement-3";
+import { initBookingForm } from "./modules/booking-form.js?v=mobile-refinement-3";
+import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-refinement-3";
 
 (() => {
   const contentUrl = document.body.dataset.contentUrl || "./content/site-content.json";
