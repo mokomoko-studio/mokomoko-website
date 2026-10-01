@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "title": "MOKOMOKO 日系寵物攝影｜台北・新北",
+    "description": "MOKOMOKO 日系寵物攝影，由女攝影師小魚記錄毛孩與飼主之間自然、細膩的日常。台北新北，全預約制。",
+    "ogTitle": "MOKOMOKO 日系寵物攝影",
+    "ogDescription": "以獨特柔和的眼光，捕捉毛孩與飼主生活中細微的美好。"
+  },
+  "social": {
+    "instagramLabel": "MKMKPET",
+    "instagramUrl": "https://www.instagram.com/mkmkpet/"
+  },
+  "hero": {
+    "kicker": "癒し系動物写真",
+    "titleLines": ["MOKO", "MOKO"],
+    "tagline": "生活不只是日復一日，還有毛茸茸的幸福 ♥",
+    "images": {
+      "dog": { "path": "", "alt": "待替換：柯基犬去背照片", "placeholder": "柯基犬照片待替換" },
+      "cat": { "path": "", "alt": "待替換：橘白貓去背照片", "placeholder": "橘白貓照片待替換" }
+    }
+  },
+  "intro": {
+    "title": "⋆⸜ MOKOMOKO・日系寵物攝影 ౨ৎ",
+    "subtitle": "女攝影師小魚 ｜ 台北新北 ｜ 全預約制"
+  },
+  "navigation": [
+    { "label": "品牌理念", "url": "#philosophy", "primary": false },
+    { "label": "攝影方案", "url": "#plans", "primary": false },
+    { "label": "常見問題", "url": "#faq", "primary": false },
+    { "label": "＼ 點此即刻預約 ／", "url": "#booking", "primary": true }
+  ],
+  "philosophy": {
+    "title": "⋆⸜ 品牌理念 ౨ৎ",
+    "definition": "モコモコ 形容毛茸茸，像棉花、雲朵的小動物",
+    "firstBlock": ["以獨特柔和的眼光", "捕捉每一幀生活中細微的美好", "注重飼主與毛孩間的真摯情感", "自然而細膩的互動讓畫面更具紀念", "在往後的日子感受到深層次的共鳴"],
+    "secondTitle": "日系清新色調",
+    "secondBlock": ["毛孩輕輕步入我們的生命裡", "愛與離別正同時進行", "無畏無懼的寶寶／活潑貪玩的朋友", "／沈穩安詳的老伴", "透過我手中的單眼，紀錄每一個階段性的成長", "在片刻的平靜創造出觸動人心的時光"],
+    "closing": "放慢腳步 細心生活"
+  },
+  "photographyTypes": {
+    "title": "⋆⸜ 攝影方案 ౨ৎ",
+    "intro": ["拍攝價格會隨檔期浮動", "還請把握每一次推出的優惠方案 ♡"],
+    "items": [
+      { "id": "outdoor", "name": "毛孩戶外攝影", "lead": "屬於你們的親子日 .ᐟ.ᐟ", "details": ["① 適用對象　狗／貓（已受降敏訓練）", "② 拍攝時長　1–1.5 小時"] },
+      { "id": "studio", "name": "特寵棚拍寫真", "lead": "不怕遇雨延期不怕寶貝驚擾 (˶ᐢᗜᐢ˶)", "details": ["① 適用對象　貓／天竺鼠／兔／爬蟲／其他", "② 拍攝時長　1 小時，敏感毛孩建議 2 小時", "③ 額外加收租棚費用"] }
+    ]
+  },
+  "plans": [
+    {
+      "id": "basic",
+      "name": "基本方案",
+      "badge": "基本方案",
+      "imageOverlay": "輕鬆體驗",
+      "price": 4880,
+      "originalPrice": null,
+      "featured": false,
+      "items": ["① 精修照　8 張"],
+      "notes": [],
+      "image": { "path": "", "alt": "待替換：基本方案橘貓照片", "placeholder": "橘貓照片待替換" }
+    },
+    {
+      "id": "popular",
+      "name": "最受歡迎方案",
+      "badge": "最受歡迎",
+      "imageOverlay": "CP首選",
+      "price": 5980,
+      "originalPrice": 6880,
+      "featured": true,
+      "items": ["① 精修照　10 張", "② 調色毛片　40 張"],
+      "notes": ["＊拍攝時長 1–1.5小時", "＊特寵專屬租棚費折 $200"],
+      "image": { "path": "", "alt": "待替換：最受歡迎方案狗狗照片", "placeholder": "狗狗照片待替換" }
+    },
+    {
+      "id": "luxury",
+      "name": "豪華套餐",
+      "badge": "豪華套餐",
+      "imageOverlay": "一次到位",
+      "price": 8080,
+      "originalPrice": 9650,
+      "featured": false,
+      "items": ["① 精修照　15 張", "② 調色毛片　40 張", "贈　寵生四格照　12 條", "贈　30×30cm 無框畫　1 幅"],
+      "notes": [],
+      "image": { "path": "", "alt": "待替換：豪華套餐天竺鼠照片", "placeholder": "天竺鼠照片待替換" }
+    }
+  ],
+  "addons": {
+    "title": "加購項目",
+    "items": [
+      { "id": "color-proofs-40", "name": "40 張調色毛片", "price": 1000 },
+      { "id": "retouched-photo", "name": "單張精修", "price": 500 },
+      { "id": "second-pet", "name": "第 2 隻毛孩", "price": 500 },
+      { "id": "studio-hour", "name": "租借攝影棚每 1 小時", "price": 1200 },
+      { "id": "photo-strips-12", "name": "12 條寵生四格照", "price": 500 },
+      { "id": "canvas-15", "name": "15×15cm無框畫", "price": 500 },
+      { "id": "canvas-30", "name": "30×30cm無框畫", "price": 650 }
+    ],
+    "images": [
+      { "path": "", "alt": "待替換：寵生四格照商品照片", "placeholder": "寵生四格照照片待替換" },
+      { "path": "", "alt": "待替換：無框畫商品照片", "placeholder": "無框畫照片待替換" }
+    ]
+  },
+  "works": { "featured": [], "recent": [] },
+  "faq": {
+    "title": "⋆⸜ 常見問題 ౨ৎ",
+    "intro": ["小魚整理了平常收到客人常發問的拍攝相關問題", "如有其他疑惑歡迎至", "私訊詢問"],
+    "contact": { "label": "@mkmkpet", "url": "https://www.instagram.com/mkmkpet/" },
+    "items": [
+      {
+        "id": "suitable-pets",
+        "question": "・我的毛小孩適合拍攝嗎？",
+        "answer": ["MOKOMOKO 的女攝影師有豐富的拍攝經驗", "無論是敏感／活潑／安靜、寶寶／朋友／老伴", "根據每隻毛孩的個性與年紀的不同", "會有溫柔的專業引導，飼主僅需配合攝影師的指示♡"],
+        "subquestion": "什麼樣的毛孩不建議拍攝？",
+        "list": ["➤ 具有強烈攻擊性", "➤ 對環境高敏以至於無法外出", "➤ 特殊身體狀況（如高風險生病開刀）"]
+      },
+      {
+        "id": "location",
+        "question": "・拍攝地點位於哪裡？",
+        "answer": ["拍攝地點以雙北公園為主，建議人少乾淨寬敞之空間", "後續細節共同討論，可由攝影師安排常拍攝地點", "外縣市及雙北部分偏遠地區須加收交通費", "（南下交通方式為高鐵與計程車轉乘，當日來回費用）"],
+        "subquestion": "",
+        "list": []
+      },
+      {
+        "id": "dog-studio",
+        "question": "・狗狗有室內棚拍嗎？",
+        "answer": ["目前僅接受高敏貓咪與嬌弱特寵（天竺鼠／兔／爬蟲類）", "戶外寫真是我們的日系主推，狗狗能盡情奔放自在", "未來攝影棚擴大時，將開放狗狗體驗室內拍攝"],
+        "subquestion": "",
+        "list": []
+      },
+      {
+        "id": "photo-selection",
+        "question": "・我所購買的精修可自己挑選嗎？",
+        "answer": ["攝影師將根據專業角度評估畫面構圖、光線的完美程度", "由於一般人難以僅憑毛片來感受效果，因此無挑片流程", "部分優惠方案已含 40 張調色毛片供收藏", "如有需要還可額外購買精修照片"],
+        "subquestion": "",
+        "list": []
+      },
+      {
+        "id": "retouching-difference",
+        "question": "・精修與調色毛片差在哪裡？",
+        "answer": ["精修包含明暗對比調整、毛髮瑕疵修正、添加眼神光、", "笑容調整、身形比例調整、畫面雜物去除、", "背景光線修正、獨特色彩風格調整；", "而您所額外加購（或方案內含）的調色毛片", "會經由攝影師進行初步裁切與調色"],
+        "subquestion": "",
+        "list": []
+      }
+    ]
+  },
+  "booking": {
+    "title": "⋆⸜ 預約須知 ౨ৎ",
+    "intro": ["預約流程快速簡單，私訊詢問並預約時段", "也可填寫下方預約單，待攝影師主動與您聯繫"],
+    "pill": "⁺˖ 女攝影師 小魚 ｜ 療癒系寫真 🫧 ͛.*",
+    "notes": [
+      { "number": "①", "lines": ["拍攝地點以雙北地區為主", "外縣市及雙北部分偏遠地區須加收交通費", "（南下交通方式為高鐵與計程車轉乘，當日來回費用）"] },
+      { "number": "②", "lines": ["假日人潮多，建議挑選平日時段", "可以盡情在草地上跑跑呦"] },
+      { "number": "③", "lines": ["當天陪同人數至多三位", "以免影響拍攝進度"] },
+      { "number": "④", "lines": ["歡迎入鏡合照", "建議穿著淡色系服裝"] },
+      { "number": "⑤", "lines": ["確認拍攝日期後請於三天內完成匯款", "逾期不保留檔期"] },
+      { "number": "⑥", "lines": ["MOKOMOKO 有使用肖像之權利", "可於各平台分享之用途，不方便露臉請事前告知"] }
+    ],
+    "prompt": "⋆⸜ 若上述內容您皆同意，再請協助填寫毛孩資料："
+  },
+  "bookingCta": {
+    "title": "MOKOMOKO 寵物攝影預約單",
+    "description": "預約表單將於獨立頁面開啟。",
+    "label": "＼ 點此即刻預約 ／",
+    "url": "https://mokomoko-studio.github.io/mokomoko-booking-form/"
+  },
+  "closing": {
+    "title": "⋆⸜ 填寫完畢請按提交鈕 ౨ৎ",
+    "lines": ["感謝您的填寫，待攝影師與您討論", "拍攝之地點與時段", "毛孩本身若有特殊狀況，務必提前告知", "匯款後才正式保留拍攝檔期"]
+  },
+  "integrations": {
+    "calculator": { "enabled": false, "mountId": "plan-calculator-root", "uses": ["plans", "addons.items"] },
+    "bookingForm": { "enabled": false, "mountId": "booking-form-root", "repository": "mokomoko-studio/mokomoko-booking-form" },
+    "featuredWorks": { "enabled": false, "mountId": "featured-works-root", "uses": ["works.featured"] },
+    "recentWorks": { "enabled": false, "mountId": "instagram-recent-works-root", "uses": ["works.recent"], "provider": "instagram" }
+  }
+}
