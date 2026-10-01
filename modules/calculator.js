@@ -21,6 +21,7 @@ export function initCalculator(root, content) {
     environment: null,
     products: Object.fromEntries(engine.bookingAddons.map((addon) => [addon.id, 0])),
   };
+  let carouselInteracted = false;
 
   root.innerHTML = `
     <div class="pricing-flow">
@@ -108,12 +109,20 @@ export function initCalculator(root, content) {
     <button type="button" class="text-control" data-species="${key}" role="radio" aria-checked="false">${escapeHtml(info.label)}</button>`).join("");
 
   const centerInitialPlan = () => {
-    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    if (!window.matchMedia("(max-width: 767px)").matches || carouselInteracted || state.plan) return;
     const card = root.querySelector('[data-plan="easy"]');
     const track = card?.closest(".plan-card-track");
     if (!card || !track) return;
-    track.scrollLeft = card.offsetLeft - ((track.clientWidth - card.clientWidth) / 2);
+    const cardRect = card.getBoundingClientRect();
+    const trackRect = track.getBoundingClientRect();
+    track.scrollLeft += (cardRect.left + (cardRect.width / 2)) - (trackRect.left + (trackRect.width / 2));
   };
+
+  const scheduleInitialCenter = () => requestAnimationFrame(() => requestAnimationFrame(centerInitialPlan));
+  root.querySelectorAll(".plan-card-track").forEach((track) => {
+    track.addEventListener("pointerdown", () => { carouselInteracted = true; }, { passive: true });
+    track.addEventListener("touchstart", () => { carouselInteracted = true; }, { passive: true });
+  });
 
   const currentPlan = () => engine.getPlan(state.plan);
 
@@ -258,6 +267,8 @@ export function initCalculator(root, content) {
   });
 
   render();
-  requestAnimationFrame(centerInitialPlan);
+  scheduleInitialCenter();
+  document.fonts?.ready.then(scheduleInitialCenter);
+  window.addEventListener("resize", scheduleInitialCenter, { passive: true });
   window.__MOKOMOKO_CALCULATOR__ = { state, engine, selectPlan, selectSpecies, changePetCount, changeProductCount };
 }
