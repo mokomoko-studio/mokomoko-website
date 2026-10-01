@@ -1,3 +1,6 @@
+import { initCalculator } from "./modules/calculator.js";
+import { initBookingForm } from "./modules/booking-form.js";
+
 (() => {
   const CONTENT_URL = "./content/site-content.json";
   const root = document.querySelector("#site-root");
@@ -73,10 +76,10 @@
       </div>
     </section>`;
 
-  const renderPricing = ({ plans, integrations }) => `
+  const renderPricing = ({ plans }) => `
     <section class="section pricing blue-section" aria-label="攝影價格方案">
       <div class="content pricing-list">
-        ${plans.map((plan) => {
+        ${plans.filter((plan) => plan.showcase).map((plan) => {
           const overlay = `<span class="ribbon${plan.featured ? " popular" : ""}">${escapeHtml(plan.badge)}</span><strong>${escapeHtml(plan.imageOverlay)}</strong>`;
           return `<article class="price-card${plan.featured ? " featured" : ""}">
             ${renderImage(plan.image, "price-image", overlay)}
@@ -88,7 +91,6 @@
             </div>
           </article>`;
         }).join("")}
-        <div id="${escapeHtml(integrations.calculator.mountId)}" class="future-module" data-content-source="plans,addons" hidden></div>
       </div>
     </section>`;
 
@@ -117,6 +119,17 @@
       </div>
     </section>`;
 
+  const renderCalculator = ({ calculator, integrations }) => `
+    <section id="calculator" class="section calculator-section off-white" aria-labelledby="calculator-title">
+      <div class="content">
+        <div class="centered calculator-heading">
+          <h2 id="calculator-title" class="section-title">${escapeHtml(calculator.title)}</h2>
+          <p>${escapeHtml(calculator.subtitle)}</p>
+        </div>
+        <div id="${escapeHtml(integrations.calculator.mountId)}" class="calculator-module" data-content-source="plans,addons,calculator"></div>
+      </div>
+    </section>`;
+
   const renderBooking = ({ booking, bookingCta, integrations }) => `
     <section id="booking" class="section booking" aria-labelledby="booking-title">
       <div class="content narrow centered">
@@ -127,12 +140,11 @@
         <p class="booking-prompt">${escapeHtml(booking.prompt)}</p>
       </div>
     </section>
-    <section class="section booking-cta off-white" aria-labelledby="form-title">
+    <section id="booking-form-section" class="section booking-cta off-white" aria-labelledby="form-title">
       <div class="content narrow centered">
         <h2 id="form-title" class="section-title">${escapeHtml(bookingCta.title)}</h2>
         <p>${escapeHtml(bookingCta.description)}</p>
-        <a class="booking-button" href="${safeUrl(bookingCta.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bookingCta.label)}</a>
-        <div id="${escapeHtml(integrations.bookingForm.mountId)}" class="future-module" data-content-source="booking" hidden></div>
+        <div id="${escapeHtml(integrations.bookingForm.mountId)}" class="booking-module" data-content-source="bookingForm"></div>
       </div>
     </section>`;
 
@@ -176,12 +188,15 @@
       ${renderPlanTypes(content.photographyTypes)}
       ${renderPricing(content)}
       ${renderAddons(content.addons)}
+      ${renderCalculator(content)}
       <div id="${escapeHtml(content.integrations.featuredWorks.mountId)}" class="future-module" data-content-source="works.featured" hidden></div>
       <div id="${escapeHtml(content.integrations.recentWorks.mountId)}" class="future-module" data-content-source="works.recent" hidden></div>
       ${renderFaq(content.faq)}
       ${renderBooking(content)}
     </main>${renderClosing(content)}`;
     bindNavigation();
+    initCalculator(document.getElementById(content.integrations.calculator.mountId), content);
+    initBookingForm(document.getElementById(content.integrations.bookingForm.mountId), content);
   };
 
   fetch(CONTENT_URL)

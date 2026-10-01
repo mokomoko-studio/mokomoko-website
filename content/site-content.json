@@ -27,7 +27,7 @@
     { "label": "品牌理念", "url": "#philosophy", "primary": false },
     { "label": "攝影方案", "url": "#plans", "primary": false },
     { "label": "常見問題", "url": "#faq", "primary": false },
-    { "label": "＼ 點此即刻預約 ／", "url": "#booking", "primary": true }
+    { "label": "＼ 點此即刻預約 ／", "url": "#booking-form-section", "primary": true }
   ],
   "philosophy": {
     "title": "⋆⸜ 品牌理念 ౨ৎ",
@@ -47,37 +47,73 @@
   },
   "plans": [
     {
-      "id": "basic",
-      "name": "基本方案",
+      "id": "christmas",
+      "name": "✧ 特寵／貓｜聖誕寫真收藏",
+      "price": 6980,
+      "type": "limited",
+      "allowed": ["cat", "exotic"],
+      "description": "已含基本棚拍場租（多隻毛孩加購、場租時數依拍攝對象另計算）",
+      "packageItems": ["10 張精修照片", "40 張調色毛片", "再贈 10 張調色毛片"],
+      "packageSummary": "共 60 張攝影作品",
+      "showcase": false
+    },
+    {
+      "id": "guinea",
+      "name": "✧ 天竺鼠｜聖誕聯名收藏組",
+      "label": "天天好萌插畫家聯名",
+      "price": 7980,
+      "type": "limited",
+      "allowed": ["guinea"],
+      "description": "已含基本棚拍場租（多隻毛孩加購、場租時數另計算）",
+      "packageItems": ["5 張精修照片", "40 張調色毛片", "3 張客製聖誕插畫電子檔", "3 款(6入) 客製專屬聖誕吊飾", "1 張 天天好萌水晶貼紙"],
+      "packageNote": "✧ 3 款天天好萌客製聖誕角色，每款製作 2 個，共 6 個聖誕吊飾！",
+      "packageSummary": "共 45 張攝影作品＋3 張客製聖誕插畫電子檔＋7 件實體收藏",
+      "showcase": false
+    },
+    {
+      "id": "easy",
+      "name": "✧ 輕鬆體驗",
       "badge": "基本方案",
       "imageOverlay": "輕鬆體驗",
       "price": 4880,
+      "type": "regular",
+      "allowed": ["dog", "cat", "exotic"],
+      "description": "包含精修照片 8 張",
       "originalPrice": null,
       "featured": false,
+      "showcase": true,
       "items": ["① 精修照　8 張"],
       "notes": [],
       "image": { "path": "", "alt": "待替換：基本方案橘貓照片", "placeholder": "橘貓照片待替換" }
     },
     {
-      "id": "popular",
-      "name": "最受歡迎方案",
+      "id": "cp",
+      "name": "✧ CP首選",
       "badge": "最受歡迎",
       "imageOverlay": "CP首選",
       "price": 5980,
+      "type": "regular",
+      "allowed": ["dog", "cat", "exotic"],
+      "description": "包含精修照片 10 張＋調色毛片 40 張",
       "originalPrice": 6880,
       "featured": true,
+      "showcase": true,
       "items": ["① 精修照　10 張", "② 調色毛片　40 張"],
       "notes": ["＊拍攝時長 1–1.5小時", "＊特寵專屬租棚費折 $200"],
       "image": { "path": "", "alt": "待替換：最受歡迎方案狗狗照片", "placeholder": "狗狗照片待替換" }
     },
     {
       "id": "luxury",
-      "name": "豪華套餐",
+    "name": "✧ 豪華套餐",
       "badge": "豪華套餐",
       "imageOverlay": "一次到位",
       "price": 8080,
+      "type": "regular",
+      "allowed": ["dog", "cat", "exotic"],
+      "description": "包含精修照片 15 張＋調色毛片 40 張＋寵生四格照 12 條＋30×30cm 無框畫 1 幅",
       "originalPrice": 9650,
       "featured": false,
+      "showcase": true,
       "items": ["① 精修照　15 張", "② 調色毛片　40 張", "贈　寵生四格照　12 條", "贈　30×30cm 無框畫　1 幅"],
       "notes": [],
       "image": { "path": "", "alt": "待替換：豪華套餐天竺鼠照片", "placeholder": "天竺鼠照片待替換" }
@@ -89,10 +125,10 @@
       { "id": "color-proofs-40", "name": "40 張調色毛片", "price": 1000 },
       { "id": "retouched-photo", "name": "單張精修", "price": 500 },
       { "id": "second-pet", "name": "第 2 隻毛孩", "price": 500 },
-      { "id": "studio-hour", "name": "租借攝影棚每 1 小時", "price": 1200 },
-      { "id": "photo-strips-12", "name": "12 條寵生四格照", "price": 500 },
-      { "id": "canvas-15", "name": "15×15cm無框畫", "price": 500 },
-      { "id": "canvas-30", "name": "30×30cm無框畫", "price": 650 }
+      { "id": "studio-hour", "name": "租借攝影棚每 1 小時", "price": 1000 },
+      { "id": "strip", "name": "12 條寵生四格照", "calculatorName": "寵生四格照 12 條", "price": 500, "calculator": true },
+      { "id": "canvas15", "name": "15×15cm無框畫", "calculatorName": "15×15cm 無框畫", "price": 500, "calculator": true },
+      { "id": "canvas30", "name": "30×30cm無框畫", "calculatorName": "30×30cm 無框畫", "price": 650, "calculator": true }
     ],
     "images": [
       { "path": "", "alt": "待替換：寵生四格照商品照片", "placeholder": "寵生四格照照片待替換" },
@@ -158,17 +194,60 @@
   },
   "bookingCta": {
     "title": "MOKOMOKO 寵物攝影預約單",
-    "description": "預約表單將於獨立頁面開啟。",
-    "label": "＼ 點此即刻預約 ／",
-    "url": "https://mokomoko-studio.github.io/mokomoko-booking-form/"
+    "description": "女攝影師小魚・療癒系寫真｜填寫前請先參閱 Instagram：mkmkpet 的拍攝作品。",
+    "label": "前往預約表單",
+    "url": "#booking-form-section"
   },
   "closing": {
     "title": "⋆⸜ 填寫完畢請按提交鈕 ౨ৎ",
     "lines": ["感謝您的填寫，待攝影師與您討論", "拍攝之地點與時段", "毛孩本身若有特殊狀況，務必提前告知", "匯款後才正式保留拍攝檔期"]
   },
+  "calculator": {
+    "title": "⋆⸜ 方案費用試算 ౨ৎ",
+    "subtitle": "慢慢選擇最適合毛孩的拍攝方式，費用會即時為你整理好。",
+    "limitedHeading": "11/1-12/10 聖誕室內棚拍（10/31 預約截止）",
+    "regularHeading": "常態拍攝方案",
+    "species": {
+      "dog": { "label": "狗狗", "max": 3 },
+      "cat": { "label": "貓咪", "max": 2 },
+      "exotic": { "label": "特寵", "max": 4 },
+      "guinea": { "label": "天竺鼠", "max": 3 }
+    },
+    "extraPetPrice": 500,
+    "studioHourlyPrice": 1000,
+    "limitedIncludedHours": 1,
+    "rules": [
+      "棚拍費用依毛孩數量與預估拍攝時數計算。",
+      "聖誕寫真收藏與天竺鼠聯名聖誕收藏組皆已包含 1 小時基本棚租。",
+      "若因毛孩數量需要增加拍攝時數，將依一般棚拍費 NT$1,000／小時加收。",
+      "貓咪 1–2 隻皆以 2 小時計算。",
+      "特寵 3 隻以 1.5 小時計算；4 隻以 2 小時計算。",
+      "常態方案仍依一般棚拍費 NT$1,000／小時計算。",
+      "實際拍攝時間與棚租仍將依毛孩數量及現場狀況，由攝影師確認。"
+    ],
+    "reserveLabel": "我要預約"
+  },
+  "bookingForm": {
+    "endpoint": "https://docs.google.com/forms/d/e/1FAIpQLSfUT7IxV-mO5zFyVAb08hzvACuDfe3olZ80Co4NhulU3hS8Hg/formResponse",
+    "eyebrow": "MOKOMOKO PET PHOTOGRAPHY",
+    "fields": [
+      { "key": "pet-name", "type": "text", "label": "❶ 毛孩暱稱", "name": "entry.1663111275", "required": true, "error": "請填寫毛孩暱稱。" },
+      { "key": "pet-type", "type": "radio", "label": "❷ 毛孩品種", "name": "entry.1815331256", "required": true, "error": "請選擇毛孩品種。", "options": ["狗狗（戶外）", "貓貓（戶外/室內棚拍）", "天竺鼠（特寵須室內棚拍）", "兔子（特寵須室內棚拍）", "爬蟲（特寵須室內棚拍）"], "other": { "name": "entry.1815331256.other_option_response", "placeholder": "請填寫毛孩品種", "control": "input" } },
+      { "key": "age", "type": "select", "label": "❸ 歲數", "name": "entry.1286144081", "required": true, "error": "請選擇毛孩歲數。", "placeholder": "請選擇", "options": ["0（11個月內)", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16以上"] },
+      { "key": "notes", "type": "radio", "label": "❸ 備註", "hint": "如不落地、全程牽繩、對陌生人敏感、不理解指令", "name": "entry.622904434", "required": true, "error": "請選擇或填寫備註。", "options": ["無"], "other": { "name": "entry.622904434.other_option_response", "placeholder": "請填寫備註", "control": "textarea" } },
+      { "key": "instagram", "type": "text", "label": "❹ 飼主 Instagram 帳號", "hint": "請如實填寫正確 ID。", "name": "entry.1343958423", "required": true, "error": "請填寫飼主 Instagram 帳號。" },
+      { "key": "source", "type": "radio", "label": "❺ 請問您是透過什麼平台認識 𝐌𝐎𝐊𝐎𝐌𝐎𝐊𝐎 呢？", "hint": "感謝答覆，這對我們來說非常重要ꜝꜝ", "name": "entry.474112390", "required": true, "error": "請選擇認識 MOKOMOKO 的平台。", "options": ["從 Instagram 廣告看到我們的！", "從 Threads 貼文看到我們的！", "曾體驗過我們拍攝的親友推薦的！", "無意間在 IG Reels 上滑到的！"], "other": { "name": "entry.474112390.other_option_response", "placeholder": "請填寫平台", "control": "input" } },
+      { "key": "confirmation", "type": "radio", "label": "感謝預約，這幾天攝影師會主動聯繫您，再麻煩請幫我留意IG陌生訊息哦！", "name": "entry.1086373769", "required": true, "error": "請確認已瞭解聯繫方式。", "options": ["我已瞭解！"] }
+    ],
+    "submitLabel": "送出預約資料",
+    "submittingLabel": "送出中…",
+    "submitNote": "送出後請留意 Instagram 陌生訊息。",
+    "successTitle": "預約資料已送出",
+    "successMessage": "謝謝你，攝影師會在這幾天透過 Instagram 主動聯繫。"
+  },
   "integrations": {
-    "calculator": { "enabled": false, "mountId": "plan-calculator-root", "uses": ["plans", "addons.items"] },
-    "bookingForm": { "enabled": false, "mountId": "booking-form-root", "repository": "mokomoko-studio/mokomoko-booking-form" },
+    "calculator": { "enabled": true, "mountId": "plan-calculator-root", "uses": ["plans", "addons.items", "calculator"] },
+    "bookingForm": { "enabled": true, "mountId": "booking-form-root", "repository": "mokomoko-studio/mokomoko-booking-form" },
     "featuredWorks": { "enabled": false, "mountId": "featured-works-root", "uses": ["works.featured"] },
     "recentWorks": { "enabled": false, "mountId": "instagram-recent-works-root", "uses": ["works.recent"], "provider": "instagram" }
   }

@@ -11,6 +11,15 @@
   --border: #cacaca;
   --content: 1024px;
   --narrow: 760px;
+  --content-width: var(--content);
+  --section-spacing: clamp(64px, 9vw, 112px);
+  --heading-size: clamp(1.45rem, 4vw, 2rem);
+  --body-size: 1rem;
+  --radius: 14px;
+  --button-height: 52px;
+  --input-height: 48px;
+  --form-gap: 18px;
+  --calculator-gap: 20px;
   --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --rounded: "Zen Maru Gothic", "PingFang TC", "Microsoft JhengHei", sans-serif;
 }
@@ -67,7 +76,7 @@ ul {
 }
 
 .section {
-  padding: clamp(64px, 9vw, 112px) 0;
+  padding: var(--section-spacing) 0;
 }
 
 .blue-section {
@@ -86,7 +95,7 @@ ul {
 .section-title {
   margin-bottom: clamp(30px, 5vw, 56px);
   font-family: var(--serif);
-  font-size: clamp(1.45rem, 4vw, 2rem);
+  font-size: var(--heading-size);
   font-weight: 600;
   letter-spacing: 0.08em;
   line-height: 1.45;
@@ -560,6 +569,428 @@ ul {
   stroke-width: 1.8;
 }
 
+[hidden] {
+  display: none !important;
+}
+
+.calculator-heading {
+  max-width: var(--narrow);
+  margin: 0 auto clamp(30px, 5vw, 48px);
+}
+
+.calculator-heading .section-title {
+  margin-bottom: 12px;
+}
+
+.calculator-grid,
+.calculator-steps,
+.calculator-choice-list,
+.calculator-breakdown,
+.booking-choices,
+.integrated-booking-form {
+  display: grid;
+  gap: var(--calculator-gap);
+}
+
+.calculator-grid {
+  align-items: start;
+}
+
+.calculator-card {
+  min-width: 0;
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  text-align: left;
+}
+
+.calculator-card h3 {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.calculator-card h3 > span {
+  display: inline-grid;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+}
+
+.module-helper,
+.module-note,
+.booking-hint,
+.booking-submit-note {
+  color: #756b67;
+  font-size: 0.9rem;
+}
+
+.calculator-group-heading {
+  margin: 24px 0 10px;
+  font-weight: 600;
+}
+
+.calculator-choice,
+.calculator-species-choice {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+
+button.calculator-choice,
+.calculator-species-choice {
+  min-height: var(--button-height);
+  cursor: pointer;
+}
+
+.calculator-choice {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+  padding: 15px;
+}
+
+.calculator-choice:not(button) {
+  grid-template-columns: 1fr;
+}
+
+.calculator-choice.is-selected,
+.calculator-species-choice.is-selected {
+  border-color: var(--blue-deep);
+  box-shadow: inset 0 0 0 1px var(--blue-deep);
+  background: #f5faff;
+}
+
+.calculator-radio {
+  width: 18px;
+  height: 18px;
+  margin-top: 4px;
+  border: 1px solid #8b8582;
+  border-radius: 50%;
+}
+
+.is-selected > .calculator-radio {
+  border: 5px solid var(--blue-deep);
+}
+
+.calculator-choice-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.calculator-choice-copy b {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+}
+
+.calculator-choice-copy small,
+.calculator-choice-copy em,
+.calculator-choice-copy u {
+  font-size: 0.84rem;
+  font-style: normal;
+  text-decoration: none;
+}
+
+.calculator-package {
+  display: grid;
+  margin-top: 5px;
+}
+
+.calculator-package i {
+  font-style: normal;
+}
+
+.calculator-package i::before {
+  content: "・";
+}
+
+.calculator-species {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.calculator-species-choice {
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.calculator-rules {
+  margin: 16px 0 20px;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.calculator-counter-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #e8e4e2;
+}
+
+.calculator-counter-row p {
+  margin: 2px 0 0;
+  color: #756b67;
+  font-size: 0.85rem;
+}
+
+.calculator-counter {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: 42px 38px 42px;
+  align-items: center;
+  text-align: center;
+}
+
+.calculator-counter button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.calculator-counter button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.calculator-breakdown {
+  gap: 0;
+  margin: 16px 0;
+}
+
+.calculator-breakdown > div {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e8e4e2;
+}
+
+.calculator-breakdown > div > span {
+  display: grid;
+}
+
+.calculator-breakdown small {
+  color: #756b67;
+}
+
+.calculator-breakdown > div > strong {
+  flex: 0 0 auto;
+}
+
+.calculator-total {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 22px 0;
+  padding-top: 18px;
+  border-top: 2px solid var(--ink);
+}
+
+.calculator-total strong {
+  color: var(--blue-deep);
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 6vw, 2.4rem);
+}
+
+.module-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: var(--button-height);
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.module-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.module-error,
+.booking-error {
+  min-height: 1.5em;
+  margin: 6px 0 0;
+  color: #b33a3a;
+  font-size: 0.88rem;
+}
+
+.booking-module {
+  margin-top: clamp(34px, 6vw, 54px);
+  text-align: left;
+}
+
+.booking-eyebrow {
+  margin-bottom: 22px !important;
+  color: var(--blue-deep);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+.integrated-booking-form {
+  gap: var(--form-gap);
+}
+
+.booking-field {
+  min-width: 0;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.booking-field.has-error {
+  border-color: #b33a3a;
+}
+
+.booking-question {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.booking-question span {
+  color: #b33a3a;
+}
+
+.booking-hint {
+  margin: -4px 0 10px !important;
+}
+
+.booking-field input[type="text"],
+.booking-field select,
+.booking-field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--input-height);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+
+.booking-field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.booking-choices {
+  gap: 8px;
+}
+
+.booking-choice {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.booking-choice:has(input:checked) {
+  background: #f0f8ff;
+}
+
+.booking-choice input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--blue-deep);
+}
+
+.booking-other {
+  margin-top: 2px;
+}
+
+.booking-submit {
+  margin-top: 8px;
+}
+
+.booking-submit-note {
+  margin: -8px 0 0 !important;
+  text-align: center;
+}
+
+.booking-success {
+  padding: clamp(30px, 6vw, 52px) 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  text-align: center;
+}
+
+.booking-success > div {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: 1.4rem;
+}
+
+.booking-success h3 {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+}
+
+.booking-success p {
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 900px) {
+  .calculator-grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.8fr);
+  }
+
+  .calculator-summary {
+    position: sticky;
+    top: 24px;
+  }
+}
+
 a:focus-visible {
   outline: 3px solid var(--yellow-strong);
   outline-offset: 4px;
@@ -687,6 +1118,28 @@ a:focus-visible {
   .booking-notes li > span {
     width: 38px;
     height: 38px;
+  }
+
+  .calculator-card,
+  .booking-field {
+    padding: 17px;
+  }
+
+  .calculator-counter-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .calculator-counter {
+    align-self: stretch;
+    grid-template-columns: 42px minmax(38px, 1fr) 42px;
+  }
+
+  .calculator-breakdown > div,
+  .calculator-total {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
 }
 
