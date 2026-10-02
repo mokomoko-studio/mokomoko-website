@@ -124,10 +124,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-r
         <div class="faq-list">${section.items.map((item, index) => `<article class="faq-item">
           <h3><button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-answer-${index}"><span${editAttr(`faq.items.${index}.question`)}>${escapeHtml(item.question)}</span><span class="faq-toggle" aria-hidden="true">＋</span></button></h3>
           <div id="faq-answer-${index}" class="faq-answer-shell"><div class="faq-answer">${item.answer.map((line, lineIndex) => `<p${editAttr(`faq.items.${index}.answer.${lineIndex}`)}>${escapeHtml(line)}</p>`).join("")}${item.subquestion ? `<h4${editAttr(`faq.items.${index}.subquestion`)}>${escapeHtml(item.subquestion)}</h4>` : ""}${item.list.length ? `<ul>${item.list.map((line, lineIndex) => `<li${editAttr(`faq.items.${index}.list.${lineIndex}`)}>${escapeHtml(line)}</li>`).join("")}</ul>` : ""}</div></div>
-        </article>`).join("")}</div>    document.addEventListener("click", (event) => {
-      if (!menu.hidden && !header.contains(event.target)) closeMenu();
-    });
-    document.addEventListener("keydown", (event) => {
+        </article>`).join("")}</div>
       </div>
     </section>`;
 
@@ -199,6 +196,9 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-r
     });
     menu.addEventListener("click", (event) => {
       if (event.target.closest("a")) closeMenu();
+    });
+    document.addEventListener("click", (event) => {
+      if (!menu.hidden && !header.contains(event.target)) closeMenu();
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !menu.hidden) closeMenu(true);
