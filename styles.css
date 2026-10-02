@@ -14,8 +14,8 @@
   --color-error: #a94040;
   --font-serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --font-sans: "Zen Maru Gothic", "PingFang TC", "Microsoft JhengHei", sans-serif;
-  --font-number: "Fredoka", "Arial Rounded MT Bold", sans-serif;
-  --number-weight: 600;
+  --font-number: "Nunito", "Arial Rounded MT Bold", sans-serif;
+  --number-weight: 700;
   --number-letter-spacing: 0.01em;
   --number-line-height: 1.1;
   --text-display: clamp(3.5rem, 17vw, 6.5rem);
@@ -1229,7 +1229,13 @@ ul {
   font-size: 16px;
 }
 
+.booking-field input[type="text"],
+.booking-field select {
+  max-width: 32rem;
+}
+
 .booking-field textarea {
+  max-width: 36rem;
   min-height: 96px;
   resize: vertical;
 }
@@ -1306,7 +1312,7 @@ ul {
 }
 
 .booking-submit-note {
-  margin: -0.35rem 0 0;
+  margin: var(--space-sm) 0 0;
   text-align: center;
 }
 
@@ -1760,6 +1766,14 @@ ul {
     line-height: 1.5;
   }
 
+  #faq > .content.narrow,
+  .booking-form-section > .content.narrow {
+    width: min(
+      calc(100% - (var(--page-padding) * 2) - (var(--space-xs) * 2)),
+      var(--content-narrow)
+    );
+  }
+
   .faq-answer {
     line-height: 1.7;
   }
@@ -1772,13 +1786,34 @@ ul {
     padding-block: var(--space-md) var(--space-lg);
   }
 
+  .booking-field input[type="text"],
+  .booking-field select {
+    width: calc(100% - var(--space-md));
+    max-width: 32rem;
+  }
+
+  .booking-field textarea {
+    width: calc(100% - var(--space-xs));
+    max-width: 36rem;
+  }
+
   .booking-question {
     margin-bottom: var(--space-xs);
     font-size: var(--text-card-title);
   }
 
   .booking-choice {
+    min-height: 44px;
+    padding: var(--space-xs) var(--space-sm);
     font-size: 0.86rem;
+  }
+
+  .booking-choices {
+    gap: 0;
+  }
+
+  .booking-choice span {
+    line-height: 1.45;
   }
 
   .booking-submit {
