@@ -135,7 +135,7 @@ export function initCalculator(root, content) {
       state.count = 1;
       state.environment = "indoor";
     } else if (!plan.applicablePetTypes.includes(state.species)) {
-      state.species = null;
+      state.species = null
       state.count = 1;
       state.environment = null;
     } else if (plan.group === "limited") {
