@@ -354,9 +354,10 @@ ul {
   position: absolute;
   top: calc(var(--header-height) - 4px);
   right: var(--header-inline-space);
-  left: var(--header-inline-space);
+  left: auto;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(15rem, calc(100% - (var(--header-inline-space) * 2)));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
   padding: 0.75rem;
   border-radius: 18px;
@@ -373,6 +374,13 @@ ul {
   align-items: center;
   justify-content: center;
   text-decoration: none;
+}
+
+.header-mobile-nav .header-nav-link {
+  min-height: 52px;
+  align-items: flex-end;
+  padding-inline: var(--space-sm);
+  text-align: right;
 }
 
 .header-nav-english {
@@ -700,7 +708,7 @@ ul {
 
 .plan-card-track {
   display: grid;
-  align-items: start;
+  align-items: stretch;
   grid-auto-columns: var(--plan-card-mobile-width);
   grid-auto-flow: column;
   gap: var(--carousel-gap);
@@ -723,7 +731,8 @@ ul {
   display: flex;
   min-width: 0;
   min-height: 0;
-  align-self: start;
+  height: 100%;
+  align-self: stretch;
   flex-direction: column;
   gap: var(--space-sm);
   padding: clamp(1rem, 4.5vw, 1.35rem);
@@ -1017,6 +1026,10 @@ ul {
   border-top: 1px solid var(--color-border);
 }
 
+#faq .section-heading {
+  text-align: center;
+}
+
 .faq-item {
   border-bottom: 1px solid var(--color-border);
 }
@@ -1026,24 +1039,28 @@ ul {
 }
 
 .faq-question {
+  position: relative;
   display: flex;
-  width: 100%;
+  width: min(100%, 36rem);
   min-height: 64px;
   gap: var(--space-md);
   align-items: center;
-  justify-content: space-between;
-  padding: 1.15rem 0;
+  justify-content: center;
+  margin-inline: auto;
+  padding: 1.15rem 2.75rem;
   border: 0;
   background: transparent;
   color: inherit;
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.55;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
 }
 
 .faq-toggle {
+  position: absolute;
+  right: var(--space-sm);
   flex: 0 0 auto;
   color: var(--color-blue-deep);
   font-size: 1.35rem;
@@ -1070,8 +1087,11 @@ ul {
   min-height: 0;
   max-width: var(--text-measure);
   overflow: hidden;
+  margin-inline: auto;
   padding: 0 0 var(--space-md);
   color: var(--color-muted);
+  line-height: 1.8;
+  text-align: center;
 }
 
 .faq-answer p {
@@ -1085,8 +1105,10 @@ ul {
 }
 
 .faq-answer ul {
+  display: inline-block;
   margin-bottom: 0;
   padding-left: 1.2rem;
+  text-align: left;
 }
 
 .booking-section {
@@ -1617,8 +1639,9 @@ ul {
   }
 
   .counter-control {
-    align-self: stretch;
-    grid-template-columns: 44px minmax(42px, 1fr) 44px;
+    width: fit-content;
+    align-self: flex-start;
+    grid-template-columns: 44px 42px 44px;
   }
 
   .plan-card-top {
