@@ -42,7 +42,6 @@ export function initBookingForm(root, content) {
   const config = content.bookingForm;
 
   root.innerHTML = `
-    <p class="booking-eyebrow"${editable("bookingForm.eyebrow")}>${escapeHtml(config.eyebrow)}</p>
     <form id="booking-form" class="integrated-booking-form" action="${escapeHtml(config.endpoint)}" method="post" target="google-form-response" novalidate>
       ${config.fields.map(renderField).join("")}
       <input type="hidden" name="fvv" value="1">

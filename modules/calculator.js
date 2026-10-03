@@ -34,7 +34,7 @@ export function initCalculator(root, content) {
           <p class="plan-group-title" ${editable("calculator.regularHeading")}>${escapeHtml(content.calculator.regularHeading)}</p>
           <div id="regularPlans" class="plan-card-track" role="radiogroup" aria-label="常態拍攝方案"></div>
         </div>
-        <div class="plan-group">
+        <div class="plan-group limited-plan-group">
           <p class="plan-group-title" ${editable("calculator.limitedHeading")}>${escapeHtml(content.calculator.limitedHeading)}</p>
           <div class="plan-group-meta">${content.calculator.limitedDates.map((line, index) => `<p ${editable(`calculator.limitedDates.${index}`)}>${escapeHtml(line)}</p>`).join("")}</div>
           <div id="limitedPlans" class="plan-card-track" role="radiogroup" aria-label="期間限定拍攝方案"></div>
@@ -87,8 +87,9 @@ export function initCalculator(root, content) {
     </div>`;
 
   const planFeatures = (plan) => plan.packageItems || plan.items || [];
+  const limitedStudioLabel = () => `（已含基本場租 ${content.calculator.limitedIncludedHours} 小時）`;
   const displayPlanFeatures = (plan) => [
-    ...(plan.group === "limited" ? [`已含基本場租 ${content.calculator.limitedIncludedHours} 小時`] : []),
+    ...(plan.group === "limited" ? [limitedStudioLabel()] : []),
     ...planFeatures(plan).map((item) => item.replace(/^[①②③④⑤]\s*/, "")),
   ];
   const planCard = (plan) => {
@@ -104,7 +105,7 @@ export function initCalculator(root, content) {
         <span class="plan-name" ${editable(`${path}.name`)}>${escapeHtml(plan.name)}</span>
       </span>
       <span class="plan-price">${engine.formatMoney(plan.price)}</span>
-      <span class="plan-features">${plan.group === "limited" ? `<span><i aria-hidden="true">✓</i> <span>已含基本場租 ${escapeHtml(content.calculator.limitedIncludedHours)} 小時</span></span>` : ""}${features.map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>
+      <span class="plan-features">${plan.group === "limited" ? `<span class="plan-studio-included"><span>${escapeHtml(limitedStudioLabel())}</span></span>` : ""}${features.map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>
       <span class="plan-estimate-button" aria-hidden="true">選擇並估價</span>
     </button>`;
   };
