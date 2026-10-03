@@ -127,7 +127,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       </div>
     </section>`;
 
-  const renderBooking = ({ booking, bookingCta, integrations }) => `
+  const renderBooking = ({ booking, bookingCta, bookingForm, integrations }) => `
     <section id="booking" class="section booking-section" aria-labelledby="booking-title">
       <div class="content narrow">
         <div class="section-heading centered">
@@ -143,6 +143,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     <section id="booking-form-section" class="section booking-form-section" aria-labelledby="form-title">
       <div class="content narrow">
         <div class="section-heading centered">
+          <p class="booking-eyebrow"${editAttr("bookingForm.eyebrow")}>${escapeHtml(bookingForm.eyebrow)}</p>
           <h2 id="form-title" class="section-title"${editAttr("bookingCta.title")}>${escapeHtml(bookingCta.title)}</h2>
           <p class="section-description"${editAttr("bookingCta.description")}>${escapeHtml(bookingCta.description)}</p>
         </div>

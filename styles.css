@@ -834,6 +834,15 @@ ul {
   margin-bottom: 0;
 }
 
+.limited-plan-group .plan-group-title {
+  margin-bottom: var(--space-md);
+  color: var(--color-error);
+}
+
+.limited-plan-group .plan-group-meta {
+  margin-top: 0;
+}
+
 [data-edit-path="photographyTypes.items.0.details.1"] {
   text-align: left;
 }
@@ -1000,6 +1009,10 @@ ul {
   gap: 0.3rem;
   width: 100%;
   text-align: left;
+}
+
+.plan-features > .plan-studio-included {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .plan-features i {
@@ -1374,6 +1387,11 @@ ul {
   text-align: left;
 }
 
+#faq-answer-0 ul {
+  padding-left: 0;
+  list-style: none;
+}
+
 .booking-section {
   background: var(--color-surface);
   padding-bottom: var(--space-md);
@@ -1453,7 +1471,7 @@ ul {
 }
 
 .booking-eyebrow {
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-xs);
   color: var(--color-blue-deep);
   font-size: var(--text-label);
   letter-spacing: 0.16em;
@@ -2133,6 +2151,16 @@ ul {
 
   .faq-answer {
     font-size: 0.78rem;
+    line-height: 1.65;
+  }
+
+  .booking-section .section-description,
+  .booking-notes p,
+  .booking-prompt,
+  .booking-form-section .section-description,
+  .booking-hint,
+  .booking-submit-note {
+    font-size: var(--text-label);
     line-height: 1.65;
   }
 
