@@ -31,11 +31,11 @@
   "hero": {
     "kicker": "癒し系動物写真",
     "titleLines": ["毛孩と、", "いつもの日々。"],
-    "tagline": "生活不只是日復一日，還有毛茸茸的幸福 ♥",
+    "tagline": "生活不只是日復一日 還有毛茸茸的幸福",
     "images": {
       "dog": { "path": "./assets/hero-shiba-scene.png", "alt": "戴著粉紅色蝴蝶結的微笑柴犬站在藍天與草地間", "placeholder": "柴犬主視覺" },
-      "mobile": { "path": "./assets/hero-mobile.png", "alt": "戴著粉紅色蝴蝶結的微笑柴犬站在藍天與草地間" },
-      "mobileTitle": { "path": "./assets/hero-title-mobile.png", "alt": "毛孩と、いつもの日々。" },
+      "mobile": { "path": "./assets/hero-mobile-20261003.png", "alt": "戴著粉紅色蝴蝶結的微笑柴犬站在藍天與草地間" },
+      "mobileTitle": { "path": "./assets/hero-title-white-20261003.png", "alt": "毛孩と、いつもの日々。" },
       "cat": { "path": "", "alt": "待替換：橘白貓去背照片", "placeholder": "橘白貓照片待替換" }
     }
   },
