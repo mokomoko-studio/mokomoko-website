@@ -1,6 +1,6 @@
-import { initCalculator } from "./modules/calculator.js?v=mobile-refinement-3";
-import { initBookingForm } from "./modules/booking-form.js?v=mobile-refinement-3";
-import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-refinement-3";
+import { initCalculator } from "./modules/calculator.js?v=ui-increment-1";
+import { initBookingForm } from "./modules/booking-form.js?v=ui-finish-1";
+import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finish-1";
 
 (() => {
   const contentUrl = document.body.dataset.contentUrl || "./content/site-content.json";
@@ -23,11 +23,18 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-r
     }
   };
 
+  const safeImageUrl = (value = "") => {
+    if (/^\.\/assets\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$/.test(value)) {
+      return escapeHtml(document.body.dataset.editor === "true" ? `.${value}` : value);
+    }
+    return safeUrl(value);
+  };
+
   const renderLines = (lines, path, className = "copy-lines") => `
     <div class="${className}">${lines.map((line, index) => `<p${editAttr(`${path}.${index}`)}>${escapeHtml(line)}</p>`).join("")}</div>`;
 
   const renderImage = (image, className) => image.path
-    ? `<div class="${className}"><img src="${safeUrl(image.path)}" alt="${escapeHtml(image.alt)}"></div>`
+    ? `<div class="${className}"><img src="${safeImageUrl(image.path)}" alt="${escapeHtml(image.alt)}"></div>`
     : `<div class="${className} image-placeholder" role="img" aria-label="${escapeHtml(image.alt)}"><small>${escapeHtml(image.placeholder)}</small></div>`;
 
   const renderHeaderLink = (item) => `<a class="header-nav-link" href="${safeUrl(item.url)}"${item.external ? ' target="_blank" rel="noopener noreferrer"' : ""}>
@@ -42,40 +49,31 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-r
 
   const renderAnnouncement = (announcement) => {
     if (!announcement?.enabled || !announcement.text) return "";
-    const message = `<span${editAttr("announcement.text")}>${escapeHtml(announcement.text)}</span>`;
-    return `<aside class="announcement-bar" aria-label="最新消息">${announcement.link ? `<a href="${safeUrl(announcement.link)}">${message}</a>` : message}</aside>`;
+    const message = `<span class="announcement-instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg><span${editAttr("announcement.text")}>${escapeHtml(announcement.text)}</span></span>`;
+    return `<aside class="announcement-bar" aria-label="Instagram">${announcement.link ? `<a href="${safeUrl(announcement.link)}" target="_blank" rel="noopener noreferrer">${message}</a>` : message}</aside>`;
   };
 
   const renderHeader = (header, hasAnnouncement = false) => `
     <header class="site-header${hasAnnouncement ? " has-announcement" : ""}">
       <div class="site-header-inner">
-        <a class="header-wordmark" href="#site-root" aria-label="回到網站頂部">
-          <span>${escapeHtml(header.logo)}</span>
-          <small>${escapeHtml(header.subtitle)}</small>
-        </a>
         <nav class="header-desktop-nav" aria-label="主要導覽">${header.items.map(renderHeaderLink).join("")}</nav>
-        <div class="header-actions">
-          <span class="header-doodle" aria-hidden="true"><svg viewBox="0 0 42 40"><path d="M27 3l7 10M38 17l-9 3M24 25l-6 9"></path></svg></span>
-          ${renderBookingCta(header)}
-          <button class="header-menu-button" type="button" aria-expanded="false" aria-controls="mobile-navigation" aria-label="開啟導覽選單">
-            <span></span><span></span><span></span>
-          </button>
-        </div>
       </div>
-      <nav id="mobile-navigation" class="header-mobile-nav" aria-label="手機主要導覽" hidden>${header.items.map(renderHeaderLink).join("")}</nav>
     </header>`;
 
-  const renderHero = ({ hero, social }) => `
-    <section class="hero blue-section" aria-labelledby="hero-title">
-      <a class="instagram-mark" href="${safeUrl(social.instagramUrl)}" target="_blank" rel="noopener noreferrer" aria-label="前往 MOKOMOKO Instagram"><span aria-hidden="true">◎</span> ${escapeHtml(social.instagramLabel)}</a>
+  const renderHero = ({ hero, header }) => {
+    const galleryItem = header.items.find((item) => item.english === "Gallery");
+    return `<section class="hero blue-section" aria-labelledby="hero-title">
+      <picture class="hero-visual">
+        <source media="(max-width: 767px)" srcset="${safeImageUrl(hero.images.mobile.path)}">
+        <img src="${safeImageUrl(hero.images.dog.path)}" alt="${escapeHtml(hero.images.dog.alt)}">
+      </picture>
       <div class="hero-inner">
-        <p class="hero-kicker"${editAttr("hero.kicker")}>${escapeHtml(hero.kicker)}</p>
-        <h1 id="hero-title">${hero.titleLines.map((line, index) => `<span${editAttr(`hero.titleLines.${index}`)}>${escapeHtml(line)}</span>`).join("")}</h1>
+        <h1 id="hero-title"><img class="hero-title-image" src="${safeImageUrl(hero.images.mobileTitle.path)}" alt="${escapeHtml(hero.images.mobileTitle.alt)}">${hero.titleLines.map((line, index) => `<span${editAttr(`hero.titleLines.${index}`)}>${escapeHtml(line)}</span>`).join("")}</h1>
         <p class="hero-tagline"${editAttr("hero.tagline")}>${escapeHtml(hero.tagline)}</p>
-        <div class="hero-images" aria-label="首頁攝影作品位置">${renderImage(hero.images.dog, "hero-dog")}${renderImage(hero.images.cat, "hero-cat")}</div>
+        ${galleryItem ? `<a class="hero-gallery-cta" href="${safeUrl(galleryItem.url)}"${galleryItem.external ? ' target="_blank" rel="noopener noreferrer"' : ""}><span>${escapeHtml(galleryItem.chinese)}</span><span aria-hidden="true">→</span></a>` : ""}
       </div>
-      <div class="wave" aria-hidden="true"></div>
     </section>`;
+  };
 
   const renderIntro = ({ intro, navigation }) => `
     <section class="intro blue-section" aria-labelledby="intro-title">
@@ -108,6 +106,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=mobile-r
           <p class="section-kicker">PRICING</p>
           <h2 id="pricing-title" class="section-title"${editAttr("calculator.title")}>${escapeHtml(calculator.title)}</h2>
           <p class="section-description"${editAttr("calculator.subtitle")}>${escapeHtml(calculator.subtitle)}</p>
+          <div class="pricing-shooting-info">${calculator.shootingInfo.map((line, index) => `<p${editAttr(`calculator.shootingInfo.${index}`)}>${escapeHtml(line)}</p>`).join("")}</div>
         </div>
         <div id="${escapeHtml(integrations.calculator.mountId)}" class="calculator-module" data-content-source="plans,addons,calculator"></div>
       </div>
