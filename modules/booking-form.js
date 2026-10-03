@@ -6,21 +6,23 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>"]/g, (character) 
 })[character]);
 
 const renderRequired = (field) => field.required ? ' <span class="required-mark" aria-hidden="true">＊</span>' : "";
+const editable = (path) => ` data-edit-path="${escapeHtml(path)}"`;
 
-const renderField = (field) => {
-  const hint = field.hint ? `<p class="booking-hint">${escapeHtml(field.hint)}</p>` : "";
+const renderField = (field, index) => {
+  const path = `bookingForm.fields.${index}`;
+  const hint = field.hint ? `<p class="booking-hint"${editable(`${path}.hint`)}>${escapeHtml(field.hint)}</p>` : "";
   const error = `<p class="booking-error" id="${field.key}-error" aria-live="polite"></p>`;
 
   if (field.type === "text" || field.type === "textarea") {
     return `<div class="booking-field" data-field="${field.key}">
-      <label class="booking-question" for="${field.key}">${escapeHtml(field.label)}${renderRequired(field)}</label>
+      <label class="booking-question" for="${field.key}"><span${editable(`${path}.label`)}>${escapeHtml(field.label)}</span>${renderRequired(field)}</label>
       ${hint}${field.type === "textarea" ? `<textarea id="${field.key}" name="${field.name}" rows="4" ${field.required ? "required" : ""}></textarea>` : `<input id="${field.key}" name="${field.name}" type="text" autocomplete="off" ${field.required ? "required" : ""}` + `>`}${error}
     </div>`;
   }
 
   if (field.type === "select") {
     return `<div class="booking-field" data-field="${field.key}">
-      <label class="booking-question" for="${field.key}">${escapeHtml(field.label)}${renderRequired(field)}</label>
+      <label class="booking-question" for="${field.key}"><span${editable(`${path}.label`)}>${escapeHtml(field.label)}</span>${renderRequired(field)}</label>
       ${hint}<select id="${field.key}" name="${field.name}" ${field.required ? "required" : ""}><option value="">${escapeHtml(field.placeholder)}</option>${field.options.map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}</select>${error}
     </div>`;
   }
@@ -30,7 +32,7 @@ const renderField = (field) => {
   const otherId = `${field.key}-other`;
   const other = field.other ? `<label class="booking-choice"><input type="radio" name="${field.name}" value="__other_option__" data-other-target="${otherId}"><span>其他</span></label>${field.other.control === "textarea" ? `<textarea class="booking-other" id="${otherId}" name="${field.other.name}" rows="3" placeholder="${escapeHtml(field.other.placeholder)}" aria-label="${escapeHtml(field.other.placeholder)}" disabled></textarea>` : `<input class="booking-other" id="${otherId}" name="${field.other.name}" type="text" placeholder="${escapeHtml(field.other.placeholder)}" aria-label="${escapeHtml(field.other.placeholder)}" disabled>`}` : "";
   return `<div class="booking-field" data-field="${field.key}" role="group" aria-labelledby="${field.key}-question">
-    <p class="booking-question" id="${field.key}-question">${escapeHtml(field.label)}${renderRequired(field)}</p>
+    <p class="booking-question" id="${field.key}-question"><span${editable(`${path}.label`)}>${escapeHtml(field.label)}</span>${renderRequired(field)}</p>
     ${hint}<div class="booking-choices">${options}${other}</div>${error}
   </div>`;
 };
@@ -40,18 +42,20 @@ export function initBookingForm(root, content) {
   const config = content.bookingForm;
 
   root.innerHTML = `
-    <p class="booking-eyebrow">${escapeHtml(config.eyebrow)}</p>
+    <p class="booking-eyebrow"${editable("bookingForm.eyebrow")}>${escapeHtml(config.eyebrow)}</p>
     <form id="booking-form" class="integrated-booking-form" action="${escapeHtml(config.endpoint)}" method="post" target="google-form-response" novalidate>
       ${config.fields.map(renderField).join("")}
       <input type="hidden" name="fvv" value="1">
       <input type="hidden" name="pageHistory" value="0">
-      <button id="submit-button" class="module-button booking-submit" type="submit">${escapeHtml(config.submitLabel)}</button>
-      <p class="booking-submit-note">${escapeHtml(config.submitNote)}</p>
+      <div class="booking-submit-area">
+        <button id="submit-button" class="module-button booking-submit" type="submit"><span${editable("bookingForm.submitLabel")}>${escapeHtml(config.submitLabel)}</span></button>
+        <p class="booking-submit-note"${editable("bookingForm.submitNote")}>${escapeHtml(config.submitNote)}</p>
+      </div>
     </form>
     <section id="booking-success" class="booking-success" aria-live="polite" hidden>
       <div aria-hidden="true">✓</div>
-      <h3>${escapeHtml(config.successTitle)}</h3>
-      <p>${escapeHtml(config.successMessage)}</p>
+      <h3${editable("bookingForm.successTitle")}>${escapeHtml(config.successTitle)}</h3>
+      <p${editable("bookingForm.successMessage")}>${escapeHtml(config.successMessage)}</p>
     </section>
     <iframe id="google-form-response" name="google-form-response" title="表單送出結果" hidden></iframe>`;
 

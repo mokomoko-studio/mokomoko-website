@@ -27,8 +27,8 @@ export function initCalculator(root, content) {
     <div class="pricing-flow">
       <section class="pricing-step pricing-plan-step" aria-labelledby="plan-step-title">
         <div class="step-heading">
-          <span class="step-number">01</span>
-          <div><h3 id="plan-step-title">選擇拍攝方案</h3><p>方案本身就是價目表，點選後會顯示適用的拍攝對象與費用條件。</p></div>
+          <div class="step-title-row"><span class="step-number">01</span><h3 id="plan-step-title">選擇拍攝方案</h3></div>
+          <p>方案本身就是價目表，點選後會顯示適用的拍攝對象與費用條件。</p>
         </div>
         <div class="plan-group">
           <p class="plan-group-title" ${editable("calculator.regularHeading")}>${escapeHtml(content.calculator.regularHeading)}</p>
@@ -36,22 +36,23 @@ export function initCalculator(root, content) {
         </div>
         <div class="plan-group">
           <p class="plan-group-title" ${editable("calculator.limitedHeading")}>${escapeHtml(content.calculator.limitedHeading)}</p>
+          <div class="plan-group-meta">${content.calculator.limitedDates.map((line, index) => `<p ${editable(`calculator.limitedDates.${index}`)}>${escapeHtml(line)}</p>`).join("")}</div>
           <div id="limitedPlans" class="plan-card-track" role="radiogroup" aria-label="期間限定拍攝方案"></div>
         </div>
       </section>
 
       <section id="petStep" class="pricing-step" aria-labelledby="pet-step-title" hidden>
         <div class="step-heading">
-          <span class="step-number">02</span>
-          <div><h3 id="pet-step-title">拍攝對象</h3><p>只顯示目前方案適用的毛孩類型。</p></div>
+          <div class="step-title-row"><span class="step-number">02</span><h3 id="pet-step-title">拍攝對象</h3></div>
+          <p>只顯示目前方案適用的毛孩類型。</p>
         </div>
         <div id="speciesChoices" class="species-controls" role="radiogroup" aria-label="拍攝對象"></div>
       </section>
 
       <section id="conditionStep" class="pricing-step" aria-labelledby="condition-step-title" hidden>
         <div class="step-heading">
-          <span class="step-number">03</span>
-          <div><h3 id="condition-step-title">數量與拍攝條件</h3><p>依毛孩數量與拍攝環境計算適用費用。</p></div>
+          <div class="step-title-row"><span class="step-number">03</span><h3 id="condition-step-title">數量與拍攝條件</h3></div>
+          <p>依毛孩數量與拍攝環境計算適用費用。</p>
         </div>
         <div id="animalCounters"></div>
         <div id="environmentBlock" class="condition-block">
@@ -67,44 +68,52 @@ export function initCalculator(root, content) {
 
       <section id="addonStep" class="pricing-step" aria-labelledby="addon-step-title" hidden>
         <div class="step-heading">
-          <span class="step-number">04</span>
-          <div><h3 id="addon-step-title">預約階段加購</h3><p>只有會影響本次預估費用的商品會列在這裡。</p></div>
+          <div class="step-title-row"><span class="step-number">04</span><h3 id="addon-step-title">預約階段加購</h3></div>
+          <p>只有會影響本次預估費用的商品會列在這裡。</p>
         </div>
         <div id="productCounters"></div>
       </section>
 
-      <aside id="summaryStep" class="pricing-summary" aria-labelledby="summary-title" hidden>
+      <aside id="summaryStep" class="pricing-summary pricing-step" aria-labelledby="summary-title" hidden>
         <div class="step-heading">
-          <span class="step-number">05</span>
-          <div><h3 id="summary-title">費用明細</h3><p id="completionNotice" aria-live="polite"></p></div>
+          <div class="step-title-row"><span class="step-number">05</span><h3 id="summary-title">費用明細</h3></div>
+          <p id="completionNotice" aria-live="polite"></p>
         </div>
         <div id="breakdown" class="pricing-breakdown" aria-live="polite"></div>
         <div class="pricing-total"><span>預估總額</span><strong id="totalAmount" aria-live="polite">NT$0</strong></div>
         <p class="module-note">此為線上費用試算，最終拍攝安排與金額將由 MOKOMOKO 確認。</p>
-        <a id="reserveButton" class="primary-button is-disabled" href="#booking-form-section" aria-disabled="true">${escapeHtml(content.calculator.reserveLabel)}</a>
+        <a id="reserveButton" class="primary-button is-disabled" href="#booking" aria-disabled="true">${escapeHtml(content.calculator.reserveLabel)}</a>
       </aside>
     </div>`;
 
   const planFeatures = (plan) => plan.packageItems || plan.items || [];
+  const displayPlanFeatures = (plan) => [
+    ...(plan.group === "limited" ? [`已含基本場租 ${content.calculator.limitedIncludedHours} 小時`] : []),
+    ...planFeatures(plan).map((item) => item.replace(/^[①②③④⑤]\s*/, "")),
+  ];
   const planCard = (plan) => {
     const planIndex = content.plans.findIndex((item) => item.id === plan.id);
     const path = `plans.${planIndex}`;
     const featureKey = plan.packageItems ? "packageItems" : "items";
-    return `<button type="button" class="plan-selector" data-plan="${escapeHtml(plan.id)}" role="radio" aria-checked="false">
+    const hasImage = Boolean(plan.image?.path);
+    const features = planFeatures(plan);
+    return `<button type="button" class="plan-selector${hasImage ? " has-plan-pet" : ""}" data-plan="${escapeHtml(plan.id)}" role="radio" aria-checked="false">
+      <span class="plan-pet-slot${hasImage ? "" : " is-empty"}"${hasImage ? "" : ' aria-hidden="true"'}>${hasImage ? `<img class="plan-pet-image" src="${escapeHtml(plan.image.path)}" alt="${escapeHtml(plan.image.alt || "")}">` : ""}</span>
       <span class="plan-card-top">
-        <span class="plan-name" ${editable(`${path}.name`)}>${escapeHtml(plan.name)}</span>
         ${plan.badge ? `<span class="plan-badge" ${editable(`${path}.badge`)}>${escapeHtml(plan.badge)}</span>` : ""}
+        <span class="plan-name" ${editable(`${path}.name`)}>${escapeHtml(plan.name)}</span>
       </span>
       <span class="plan-price">${engine.formatMoney(plan.price)}</span>
-      <span class="plan-description" ${editable(`${path}.description`)}>${escapeHtml(plan.description)}</span>
-      ${planFeatures(plan).length ? `<span class="plan-features">${planFeatures(plan).map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>` : ""}
-      ${plan.packageNote ? `<span class="plan-note" ${editable(`${path}.packageNote`)}>${escapeHtml(plan.packageNote)}</span>` : ""}
+      <span class="plan-features">${plan.group === "limited" ? `<span><i aria-hidden="true">✓</i> <span>已含基本場租 ${escapeHtml(content.calculator.limitedIncludedHours)} 小時</span></span>` : ""}${features.map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>
       <span class="plan-estimate-button" aria-hidden="true">選擇並估價</span>
     </button>`;
   };
 
   root.querySelector("#regularPlans").innerHTML = plans.filter((plan) => plan.group === "regular").map(planCard).join("");
   root.querySelector("#limitedPlans").innerHTML = plans.filter((plan) => plan.group === "limited").map(planCard).join("");
+  root.querySelectorAll(".plan-card-track").forEach((track) => {
+    track.classList.toggle("has-plan-pets", Boolean(track.querySelector(".plan-pet-image")));
+  });
   root.querySelector("#speciesChoices").innerHTML = Object.entries(engine.species).map(([key, info]) => `
     <button type="button" class="text-control" data-species="${key}" role="radio" aria-checked="false">${escapeHtml(info.label)}</button>`).join("");
 
@@ -135,7 +144,7 @@ export function initCalculator(root, content) {
       state.count = 1;
       state.environment = "indoor";
     } else if (!plan.applicablePetTypes.includes(state.species)) {
-      state.species = null
+      state.species = null;
       state.count = 1;
       state.environment = null;
     } else if (plan.group === "limited") {
@@ -204,7 +213,11 @@ export function initCalculator(root, content) {
 
   const renderSummary = () => {
     const result = engine.calculate(state);
-    root.querySelector("#breakdown").innerHTML = result.lines.map((line) => `
+    const plan = currentPlan();
+    const displayLines = result.lines.map((line) => line.id === "plan" && plan
+      ? { ...line, label: plan.name, detail: displayPlanFeatures(plan).join("・") }
+      : line);
+    root.querySelector("#breakdown").innerHTML = displayLines.map((line) => `
       <div class="breakdown-row">
         <span><strong>${escapeHtml(line.label)}</strong>${line.detail ? `<small>${escapeHtml(line.detail)}</small>` : ""}</span>
         <b>${line.kind === "included" ? "已包含" : `${line.kind === "base" ? "" : "+"}${engine.formatMoney(line.amount)}`}</b>
@@ -245,7 +258,6 @@ export function initCalculator(root, content) {
     const planButton = event.target.closest("[data-plan]");
     if (planButton) {
       selectPlan(planButton.dataset.plan);
-      root.querySelector("#petStep")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
       return;
     }
     const speciesButton = event.target.closest("[data-species]");
@@ -264,6 +276,18 @@ export function initCalculator(root, content) {
 
   root.querySelector("#reserveButton").addEventListener("click", (event) => {
     if (event.currentTarget.getAttribute("aria-disabled") === "true") event.preventDefault();
+  });
+
+  document.addEventListener("mokomoko:content-change", (event) => {
+    const { path, value } = event.detail || {};
+    const match = typeof path === "string" ? path.match(/^plans\.(\d+)\.(name|badge|packageSummary|(?:packageItems|items)\.\d+)$/) : null;
+    if (!match || typeof value !== "string") return;
+    const parts = path.split(".");
+    let cursor = content;
+    for (let index = 0; index < parts.length - 1; index += 1) cursor = cursor?.[parts[index]];
+    if (!cursor || typeof cursor[parts.at(-1)] !== "string") return;
+    cursor[parts.at(-1)] = value;
+    if (state.plan) renderSummary();
   });
 
   render();

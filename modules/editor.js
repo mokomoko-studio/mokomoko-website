@@ -17,9 +17,10 @@ const getDraft = () => {
 
 const editablePath = (path) => {
   if (!path || /(^|\.)(price|originalPrice|applicablePetTypes|sortOrder|active|max)$/.test(path)) return false;
-  if (/^(bookingForm|addons|integrations|meta)\./.test(path)) return false;
+  if (/^(addons|integrations|meta)\./.test(path)) return false;
+  if (/^bookingForm\./.test(path) && !/^bookingForm\.(eyebrow|submitLabel|submitNote|successTitle|successMessage)$/.test(path) && !/^bookingForm\.fields\.\d+\.(label|hint)$/.test(path)) return false;
   if (/^calculator\.(species|limitedIncludedHours)/.test(path)) return false;
-  return /^(announcement|hero|intro|navigation|philosophy|photographyTypes|plans|faq|booking|bookingCta|closing|calculator)\./.test(path);
+  return /^(announcement|hero|intro|navigation|philosophy|photographyTypes|plans|faq|booking|bookingForm|bookingCta|closing|calculator)\./.test(path);
 };
 
 const setPath = (target, path, value) => {
@@ -105,10 +106,10 @@ export function initEditor() {
   };
 
   const tokenDefinitions = {
-    "section-spacing": { property: "--space-section", fallback: 96, unit: "px" },
+    "section-spacing": { property: "--space-section", fallback: 104, unit: "px" },
     "card-radius": { property: "--radius-card", fallback: 16, unit: "px" },
-    "card-padding": { property: "--space-card", fallback: 24, unit: "px" },
-    "content-width": { property: "--content-max", fallback: 1120, unit: "px" },
+    "card-padding": { property: "--space-card", fallback: 26, unit: "px" },
+    "content-width": { property: "--content-max", fallback: 1060, unit: "px" },
   };
 
   Object.entries(tokenDefinitions).forEach(([id, definition]) => {
@@ -155,6 +156,7 @@ export function initEditor() {
     const path = selected.dataset.editPath;
     draft.contentOverrides[path] = controls.text.value;
     document.querySelectorAll(`[data-edit-path="${CSS.escape(path)}"]`).forEach((element) => { element.textContent = controls.text.value; });
+    document.dispatchEvent(new CustomEvent("mokomoko:content-change", { detail: { path, value: controls.text.value } }));
     save();
   });
 
