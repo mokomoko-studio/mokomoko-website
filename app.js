@@ -60,17 +60,17 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       </div>
     </header>`;
 
-  const renderHero = ({ hero, header }) => {
-    const galleryItem = header.items.find((item) => item.english === "Gallery");
+  const renderHero = ({ hero }) => {
     return `<section class="hero blue-section" aria-labelledby="hero-title">
-      <picture class="hero-visual">
+      <picture class="hero-background hero-visual">
         <source media="(max-width: 767px)" srcset="${safeImageUrl(hero.images.mobile.path)}">
         <img src="${safeImageUrl(hero.images.dog.path)}" alt="${escapeHtml(hero.images.dog.alt)}">
       </picture>
-      <div class="hero-inner">
+      <div class="hero-title-layer">
         <h1 id="hero-title"><img class="hero-title-image" src="${safeImageUrl(hero.images.mobileTitle.path)}" alt="${escapeHtml(hero.images.mobileTitle.alt)}">${hero.titleLines.map((line, index) => `<span${editAttr(`hero.titleLines.${index}`)}>${escapeHtml(line)}</span>`).join("")}</h1>
+      </div>
+      <div class="hero-content hero-inner">
         <p class="hero-tagline"${editAttr("hero.tagline")}>${escapeHtml(hero.tagline)}</p>
-        ${galleryItem ? `<a class="hero-gallery-cta" href="${safeUrl(galleryItem.url)}"${galleryItem.external ? ' target="_blank" rel="noopener noreferrer"' : ""}><span>${escapeHtml(galleryItem.chinese)}</span><span aria-hidden="true">→</span></a>` : ""}
       </div>
     </section>`;
   };
@@ -231,6 +231,31 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     document.querySelector('meta[property="og:description"]').content = meta.ogDescription;
   };
 
+  const initScrollReveal = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+
+    const revealSections = [...root.querySelectorAll("#philosophy, #plans, #booking, #faq")];
+    const fadeTargets = [...root.querySelectorAll([
+      ".intro .content",
+      ".booking-form-section .section-heading",
+      ".booking-form-section .booking-module",
+      ".closing .content",
+    ].join(","))];
+
+    const targets = [...revealSections, ...fadeTargets];
+    targets.forEach((target) => target.classList.add("reveal-item"));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8%" });
+
+    targets.forEach((target) => observer.observe(target));
+    root.classList.add("reveal-enabled");
+  };
+
   const renderSite = (sourceContent) => {
     const content = prepareEditorContent(sourceContent);
     applyMetadata(content.meta);
@@ -241,6 +266,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     bindFaq();
     initCalculator(document.getElementById(content.integrations.calculator.mountId), content);
     initBookingForm(document.getElementById(content.integrations.bookingForm.mountId), content);
+    initScrollReveal();
     initEditor();
   };
 
