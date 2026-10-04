@@ -95,6 +95,10 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       <div class="content narrow centered">
         <p class="section-kicker">OUR PHILOSOPHY</p>
         <h2 id="philosophy-title" class="section-title"${editAttr("philosophy.title")}>${escapeHtml(section.title)}</h2>
+        <div class="philosophy-label" aria-label="MOKOMOKO 品牌名稱說明">
+          <p class="philosophy-label-title"${editAttr("philosophy.label.title")}>${escapeHtml(section.label.title)}</p>
+          <p class="philosophy-label-description"${editAttr("philosophy.label.description")}>${escapeHtml(section.label.description)}</p>
+        </div>
         <div class="philosophy-copy">
           <p${editAttr("philosophy.lines.0")}>${escapeHtml(section.lines[0])}</p>
           <p${editAttr("philosophy.lines.1")}>${escapeHtml(section.lines[1])}</p>
@@ -330,6 +334,13 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       gesture: "idle",
       moved: false,
       suppressClickUntil: 0,
+      lastX: 0,
+      lastMoveTime: 0,
+      velocityX: 0,
+      inertiaStart: 0,
+      inertiaFrom: 0,
+      inertiaDistance: 0,
+      autoBlendStart: 0,
     }));
     const originals = [...gallery.querySelectorAll(".philosophy-gallery-group:not([aria-hidden]) .philosophy-polaroid")];
     const images = originals.map((button) => button.querySelector("img"));
@@ -341,20 +352,44 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     let returnFocus = null;
     let lockedScrollY = 0;
 
+    const easeOut = (progress) => {
+      let parameter = progress;
+      for (let index = 0; index < 5; index += 1) {
+        const inverse = 1 - parameter;
+        const x = 3 * inverse * inverse * parameter * 0.22 + 3 * inverse * parameter * parameter * 0.36 + parameter ** 3;
+        const derivative = 3 * inverse * inverse * 0.22 + 6 * inverse * parameter * (0.36 - 0.22) + 3 * parameter * parameter * (1 - 0.36);
+        if (Math.abs(derivative) < 0.0001) break;
+        parameter -= (x - progress) / derivative;
+      }
+      parameter = Math.max(0, Math.min(1, parameter));
+      return 1 - (1 - parameter) ** 3;
+    };
+
     const measure = () => rows.forEach((state) => {
       state.loopWidth = state.groups[1].offsetLeft - state.groups[0].offsetLeft;
       if (state.loopWidth) state.offset = ((state.offset % state.loopWidth) + state.loopWidth) % state.loopWidth;
     });
     const renderRows = () => rows.forEach((state) => {
-      const distance = state.direction < 0 ? -state.offset : state.offset - state.loopWidth;
+      const normalizedOffset = state.loopWidth ? ((state.offset % state.loopWidth) + state.loopWidth) % state.loopWidth : state.offset;
+      const distance = state.direction < 0 ? -normalizedOffset : normalizedOffset - state.loopWidth;
       state.track.style.transform = `translate3d(${distance}px, 0, 0)`;
     });
     const animate = (time) => {
       const delta = Math.min(time - previousTime, 40);
       previousTime = time;
       if (!reducedMotion.matches) rows.forEach((state) => {
-        if (state.pointerId === null && time >= state.pausedUntil && state.loopWidth) {
-          state.offset = (state.offset + delta * 0.025) % state.loopWidth;
+        if (state.inertiaStart) {
+          const progress = Math.min((time - state.inertiaStart) / 420, 1);
+          state.offset = state.inertiaFrom + state.inertiaDistance * easeOut(progress);
+          if (progress === 1) {
+            state.inertiaStart = 0;
+            state.pausedUntil = time + 1000;
+            state.autoBlendStart = state.pausedUntil;
+          }
+        } else if (state.pointerId === null && time >= state.pausedUntil && state.loopWidth) {
+          const speedBlend = state.autoBlendStart ? Math.min((time - state.autoBlendStart) / 320, 1) : 1;
+          state.offset += delta * 0.025 * speedBlend;
+          if (speedBlend === 1) state.autoBlendStart = 0;
         }
       });
       renderRows();
@@ -376,8 +411,12 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     const showLightboxImage = (step) => {
       lightboxIndex = (lightboxIndex + step + images.length) % images.length;
       const image = lightbox.querySelector("img");
-      image.src = images[lightboxIndex].currentSrc || images[lightboxIndex].src;
-      image.alt = images[lightboxIndex].alt;
+      image.classList.add("is-changing");
+      window.setTimeout(() => {
+        image.src = images[lightboxIndex].currentSrc || images[lightboxIndex].src;
+        image.alt = images[lightboxIndex].alt;
+        requestAnimationFrame(() => image.classList.remove("is-changing"));
+      }, 80);
     };
     const closeLightbox = () => {
       if (lightbox.hidden) return;
@@ -394,6 +433,11 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
         state.startX = event.clientX;
         state.startY = event.clientY;
         state.startOffset = state.offset;
+        state.lastX = event.clientX;
+        state.lastMoveTime = performance.now();
+        state.velocityX = 0;
+        state.inertiaStart = 0;
+        state.autoBlendStart = 0;
         state.gesture = "pending";
         state.moved = false;
         state.pausedUntil = Infinity;
@@ -414,15 +458,26 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
         }
         if (state.gesture !== "horizontal") return;
         event.preventDefault();
+        const time = performance.now();
+        const elapsed = Math.max(time - state.lastMoveTime, 1);
+        state.velocityX = state.velocityX * 0.55 + ((event.clientX - state.lastX) / elapsed) * 0.45;
+        state.lastX = event.clientX;
+        state.lastMoveTime = time;
         state.offset = state.startOffset + deltaX * state.direction;
-        if (state.loopWidth) state.offset = ((state.offset % state.loopWidth) + state.loopWidth) % state.loopWidth;
       });
       const endDrag = (event) => {
         if (event.pointerId !== state.pointerId) return;
         if (state.row.hasPointerCapture(event.pointerId)) state.row.releasePointerCapture(event.pointerId);
         state.row.classList.remove("is-dragging");
         state.pointerId = null;
-        state.pausedUntil = performance.now() + 900;
+        if (state.moved && !reducedMotion.matches) {
+          state.inertiaFrom = state.offset;
+          state.inertiaDistance = Math.max(-90, Math.min(90, state.velocityX * 150 * state.direction));
+          state.inertiaStart = performance.now();
+          state.pausedUntil = state.inertiaStart;
+        } else {
+          state.pausedUntil = performance.now() + 900;
+        }
         if (state.moved) state.suppressClickUntil = performance.now() + 100;
         window.setTimeout(() => { state.moved = false; }, 0);
       };
