@@ -152,8 +152,8 @@ ul {
 
 #site-root.reveal-enabled .reveal-item {
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 600ms ease-out, transform 600ms ease-out;
+  transform: translateY(18px);
+  transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1), transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
 }
 
@@ -485,6 +485,12 @@ ul {
   overflow: hidden;
 }
 
+.hero-background {
+  inset: -30px 0;
+  transform: translate3d(0, var(--hero-parallax-y, 0), 0);
+  will-change: transform;
+}
+
 .hero h1 {
   position: sticky;
   top: max(calc(var(--announcement-height) + var(--space-lg)), var(--hero-title-top));
@@ -542,7 +548,13 @@ ul {
 @media (max-width: 767px) {
   .hero {
     min-height: 0;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 1024 / 1927;
+  }
+
+  .hero-background {
+    inset: 0;
+    transform: none;
+    will-change: auto;
   }
 
   .hero-inner {
@@ -576,6 +588,7 @@ ul {
     font-size: clamp(0.72rem, 3vw, 0.82rem);
     line-height: 1.65;
     text-align: center;
+    white-space: pre-line;
     word-spacing: 0.55em;
   }
 }
@@ -590,6 +603,11 @@ ul {
   .hero h1 {
     position: absolute;
     animation: none;
+  }
+
+  .hero-background {
+    transform: none;
+    will-change: auto;
   }
 
   @media (max-width: 767px) {
@@ -651,6 +669,7 @@ ul {
 
 .jump-nav .primary {
   flex-basis: auto;
+  font-size: 0.78rem;
 }
 
 .jump-nav a {
@@ -755,6 +774,10 @@ ul {
   gap: 0;
   max-width: var(--container-default);
   margin-inline: auto;
+}
+
+.calculator-module {
+  margin-top: var(--space-lg);
 }
 
 .pricing-step {
@@ -891,6 +914,43 @@ ul {
   display: none;
 }
 
+.plan-pagination {
+  display: flex;
+  min-height: 22px;
+  gap: 0;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-xs);
+}
+
+.plan-pagination button {
+  position: relative;
+  width: 20px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.plan-pagination button::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-border);
+  content: "";
+  transform: translate(-50%, -50%);
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.plan-pagination button.is-active::before {
+  background: var(--color-blue-deep);
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
 .plan-selector {
   position: relative;
   display: flex;
@@ -912,6 +972,28 @@ ul {
   text-align: center;
   cursor: pointer;
   transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.limited-plan-group .plan-selector::before,
+.limited-plan-group .plan-selector::after {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--color-yellow-strong);
+  content: "";
+  opacity: 0.72;
+  pointer-events: none;
+  transform: rotate(45deg);
+}
+
+.limited-plan-group .plan-selector::before {
+  top: 0.75rem;
+  left: 0.8rem;
+}
+
+.limited-plan-group .plan-selector::after {
+  top: 0.75rem;
+  right: 0.8rem;
 }
 
 .plan-selector.has-plan-pet {
@@ -998,6 +1080,16 @@ ul {
   white-space: nowrap;
 }
 
+.plan-studio-included {
+  display: block;
+  width: 100%;
+  margin-top: calc(var(--space-xs) * -0.5);
+  color: var(--color-muted);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  text-align: center;
+}
+
 .step-number,
 .session-index,
 .counter-control > span {
@@ -1028,10 +1120,6 @@ ul {
   gap: 0.3rem;
   width: 100%;
   text-align: left;
-}
-
-.plan-features > .plan-studio-included {
-  grid-template-columns: minmax(0, 1fr);
 }
 
 .plan-features i {
@@ -1206,8 +1294,24 @@ ul {
   cursor: pointer;
 }
 
-.pricing-rules summary::marker {
+.pricing-rules summary::marker,
+.pricing-rules summary::-webkit-details-marker {
+  display: none;
+  content: "";
+}
+
+.pricing-rules-icon {
+  display: inline-block;
+  margin-right: var(--space-xs);
   color: var(--color-blue-deep);
+  font-size: 1.2em;
+  line-height: 1;
+  transform: rotate(0deg);
+  transition: transform 180ms ease;
+}
+
+.pricing-rules[open] .pricing-rules-icon {
+  transform: rotate(90deg);
 }
 
 .pricing-rules ul {
@@ -1786,6 +1890,10 @@ ul {
     scroll-snap-type: none;
   }
 
+  .plan-pagination {
+    display: none;
+  }
+
   .plan-selector {
     min-height: 100%;
     align-self: stretch;
@@ -2173,6 +2281,10 @@ ul {
   .booking-submit-note {
     font-size: var(--text-label);
     line-height: 1.65;
+  }
+
+  .booking-notes p {
+    font-size: calc(var(--text-label) + 1px);
   }
 
   .booking-notes {

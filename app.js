@@ -1,4 +1,4 @@
-import { initCalculator } from "./modules/calculator.js?v=ui-increment-1";
+import { initCalculator } from "./modules/calculator.js?v=hero-carousel-flow-1";
 import { initBookingForm } from "./modules/booking-form.js?v=ui-finish-1";
 import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finish-1";
 
@@ -133,11 +133,11 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
         <div class="section-heading centered">
           <p class="section-kicker">BOOKING</p>
           <h2 id="booking-title" class="section-title"${editAttr("booking.title")}>${escapeHtml(booking.title)}</h2>
-          ${renderLines(booking.intro, "booking.intro", "copy-lines section-description")}
+          ${booking.intro?.length ? renderLines(booking.intro, "booking.intro", "copy-lines section-description") : ""}
         </div>
         <p class="outline-pill centered"${editAttr("booking.pill")}>${escapeHtml(booking.pill)}</p>
         <ol class="booking-notes">${booking.notes.map((note, index) => `<li><span>${escapeHtml(note.number)}</span><div>${note.lines.map((line, lineIndex) => `<p${editAttr(`booking.notes.${index}.lines.${lineIndex}`)}>${escapeHtml(line)}</p>`).join("")}</div></li>`).join("")}</ol>
-        <p class="booking-prompt centered"${editAttr("booking.prompt")}>${escapeHtml(booking.prompt)}</p>
+        ${booking.prompt ? `<p class="booking-prompt centered"${editAttr("booking.prompt")}>${escapeHtml(booking.prompt)}</p>` : ""}
       </div>
     </section>
     <section id="booking-form-section" class="section booking-form-section" aria-labelledby="form-title">
@@ -154,7 +154,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
   const renderClosing = ({ closing, social }) => `
     <footer class="closing blue-section">
       <div class="content narrow centered">
-        <h2 class="section-title light"${editAttr("closing.title")}>${escapeHtml(closing.title)}</h2>
+        ${closing.title ? `<h2 class="section-title light"${editAttr("closing.title")}>${escapeHtml(closing.title)}</h2>` : ""}
         ${renderLines(closing.lines, "closing.lines", "copy-lines light-copy")}
         <a class="instagram-icon" href="${safeUrl(social.instagramUrl)}" target="_blank" rel="noopener noreferrer" aria-label="前往 MOKOMOKO Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg></a>
       </div>
@@ -231,6 +231,28 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     document.querySelector('meta[property="og:description"]').content = meta.ogDescription;
   };
 
+  const initHeroParallax = () => {
+    const hero = root.querySelector(".hero");
+    const background = hero?.querySelector(".hero-background");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!hero || !background || reducedMotion.matches) return;
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const progress = Math.max(0, Math.min(hero.offsetHeight, -hero.getBoundingClientRect().top));
+      background.style.setProperty("--hero-parallax-y", `${Math.min(28, progress * 0.04)}px`);
+    };
+    const requestUpdate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate, { passive: true });
+  };
+
   const initScrollReveal = () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
 
@@ -260,12 +282,13 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     const content = prepareEditorContent(sourceContent);
     applyMetadata(content.meta);
     const hasAnnouncement = Boolean(content.announcement?.enabled && content.announcement.text);
-    root.innerHTML = `${renderAnnouncement(content.announcement)}${renderHeader(content.header, hasAnnouncement)}<main>${renderHero(content)}${renderIntro(content)}${renderPhilosophy(content.philosophy)}${renderPricingCalculator(content)}<div id="${escapeHtml(content.integrations.featuredWorks.mountId)}" hidden></div><div id="${escapeHtml(content.integrations.recentWorks.mountId)}" hidden></div>${renderFaq(content.faq)}${renderBooking(content)}</main>${renderClosing(content)}`;
+    root.innerHTML = `${renderAnnouncement(content.announcement)}${renderHeader(content.header, hasAnnouncement)}<main>${renderHero(content)}${renderIntro(content)}${renderPhilosophy(content.philosophy)}${renderPricingCalculator(content)}<div id="${escapeHtml(content.integrations.featuredWorks.mountId)}" hidden></div><div id="${escapeHtml(content.integrations.recentWorks.mountId)}" hidden></div>${renderBooking(content)}${renderFaq(content.faq)}</main>${renderClosing(content)}`;
     bindNavigation();
     bindHeader();
     bindFaq();
     initCalculator(document.getElementById(content.integrations.calculator.mountId), content);
     initBookingForm(document.getElementById(content.integrations.bookingForm.mountId), content);
+    initHeroParallax();
     initScrollReveal();
     initEditor();
   };
