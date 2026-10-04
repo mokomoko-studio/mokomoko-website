@@ -28,16 +28,18 @@ export function initCalculator(root, content) {
       <section class="pricing-step pricing-plan-step" aria-labelledby="plan-step-title">
         <div class="step-heading">
           <div class="step-title-row"><span class="step-number">01</span><h3 id="plan-step-title">選擇拍攝方案</h3></div>
-          <p>方案本身就是價目表，點選後會顯示適用的拍攝對象與費用條件。</p>
-        </div>
-        <div class="plan-group">
-          <p class="plan-group-title" ${editable("calculator.regularHeading")}>${escapeHtml(content.calculator.regularHeading)}</p>
-          <div id="regularPlans" class="plan-card-track" role="radiogroup" aria-label="常態拍攝方案"></div>
+          <p ${editable("calculator.planHelper")}>${escapeHtml(content.calculator.planHelper)}</p>
         </div>
         <div class="plan-group limited-plan-group">
           <p class="plan-group-title" ${editable("calculator.limitedHeading")}>${escapeHtml(content.calculator.limitedHeading)}</p>
           <div class="plan-group-meta">${content.calculator.limitedDates.map((line, index) => `<p ${editable(`calculator.limitedDates.${index}`)}>${escapeHtml(line)}</p>`).join("")}</div>
           <div id="limitedPlans" class="plan-card-track" role="radiogroup" aria-label="期間限定拍攝方案"></div>
+          <div class="plan-pagination" data-pagination-for="limitedPlans" aria-label="期間限定方案分頁"></div>
+        </div>
+        <div class="plan-group">
+          <p class="plan-group-title" ${editable("calculator.regularHeading")}>${escapeHtml(content.calculator.regularHeading)}</p>
+          <div id="regularPlans" class="plan-card-track" role="radiogroup" aria-label="常態拍攝方案"></div>
+          <div class="plan-pagination" data-pagination-for="regularPlans" aria-label="常態方案分頁"></div>
         </div>
       </section>
 
@@ -52,7 +54,7 @@ export function initCalculator(root, content) {
       <section id="conditionStep" class="pricing-step" aria-labelledby="condition-step-title" hidden>
         <div class="step-heading">
           <div class="step-title-row"><span class="step-number">03</span><h3 id="condition-step-title">數量與拍攝條件</h3></div>
-          <p>依毛孩數量與拍攝環境計算適用費用。</p>
+          <p ${editable("calculator.conditionHelper")}>${escapeHtml(content.calculator.conditionHelper)}</p>
         </div>
         <div id="animalCounters"></div>
         <div id="environmentBlock" class="condition-block">
@@ -61,7 +63,7 @@ export function initCalculator(root, content) {
           <p id="environmentNote" class="module-note" aria-live="polite"></p>
         </div>
         <details class="pricing-rules">
-          <summary>查看棚拍與時數計算說明</summary>
+          <summary><span class="pricing-rules-icon" aria-hidden="true">›</span><span>查看棚拍與時數計算說明</span></summary>
           <ul>${content.calculator.rules.map((rule, index) => `<li ${editable(`calculator.rules.${index}`)}>${escapeHtml(rule)}</li>`).join("")}</ul>
         </details>
       </section>
@@ -105,7 +107,8 @@ export function initCalculator(root, content) {
         <span class="plan-name" ${editable(`${path}.name`)}>${escapeHtml(plan.name)}</span>
       </span>
       <span class="plan-price">${engine.formatMoney(plan.price)}</span>
-      <span class="plan-features">${plan.group === "limited" ? `<span class="plan-studio-included"><span>${escapeHtml(limitedStudioLabel())}</span></span>` : ""}${features.map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>
+      ${plan.group === "limited" ? `<span class="plan-studio-included">${escapeHtml(limitedStudioLabel())}</span>` : ""}
+      <span class="plan-features">${features.map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>
       <span class="plan-estimate-button" aria-hidden="true">選擇並估價</span>
     </button>`;
   };
@@ -118,14 +121,66 @@ export function initCalculator(root, content) {
   root.querySelector("#speciesChoices").innerHTML = Object.entries(engine.species).map(([key, info]) => `
     <button type="button" class="text-control" data-species="${key}" role="radio" aria-checked="false">${escapeHtml(info.label)}</button>`).join("");
 
-  const centerInitialPlan = () => {
-    if (!window.matchMedia("(max-width: 767px)").matches || carouselInteracted || state.plan) return;
-    const card = root.querySelector('[data-plan="cp"]');
+  const centerPlanCard = (card, behavior = "smooth") => {
     const track = card?.closest(".plan-card-track");
     if (!card || !track) return;
     const cardRect = card.getBoundingClientRect();
     const trackRect = track.getBoundingClientRect();
-    track.scrollLeft += (cardRect.left + (cardRect.width / 2)) - (trackRect.left + (trackRect.width / 2));
+    const target = track.scrollLeft + (cardRect.left + (cardRect.width / 2)) - (trackRect.left + (trackRect.width / 2));
+    track.scrollTo({ left: target, behavior });
+  };
+
+  const updatePagination = (track) => {
+    const cards = [...track.querySelectorAll("[data-plan]")];
+    const pagination = root.querySelector(`[data-pagination-for="${track.id}"]`);
+    if (!cards.length || !pagination) return;
+    const trackRect = track.getBoundingClientRect();
+    const center = trackRect.left + (trackRect.width / 2);
+    let activeIndex = 0;
+    let nearest = Infinity;
+    cards.forEach((card, index) => {
+      const rect = card.getBoundingClientRect();
+      const distance = Math.abs((rect.left + (rect.width / 2)) - center);
+      if (distance < nearest) {
+        nearest = distance;
+        activeIndex = index;
+      }
+    });
+    pagination.querySelectorAll("button").forEach((dot, index) => {
+      const active = index === activeIndex;
+      dot.classList.toggle("is-active", active);
+      dot.setAttribute("aria-current", active ? "true" : "false");
+    });
+  };
+
+  const setupPlanCarousels = () => {
+    root.querySelectorAll(".plan-card-track").forEach((track) => {
+      const cards = [...track.querySelectorAll("[data-plan]")];
+      const pagination = root.querySelector(`[data-pagination-for="${track.id}"]`);
+      pagination.innerHTML = cards.map((card, index) => `<button type="button" aria-label="查看第 ${index + 1} 個方案" data-carousel-index="${index}"></button>`).join("");
+      pagination.addEventListener("click", (event) => {
+        const dot = event.target.closest("[data-carousel-index]");
+        if (!dot) return;
+        centerPlanCard(cards[Number(dot.dataset.carouselIndex)]);
+      });
+      let frame = 0;
+      track.addEventListener("scroll", () => {
+        if (frame) cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          updatePagination(track);
+        });
+      }, { passive: true });
+      updatePagination(track);
+    });
+  };
+
+  const centerInitialPlan = () => {
+    if (!window.matchMedia("(max-width: 767px)").matches || carouselInteracted || state.plan) return;
+    const card = root.querySelector('[data-plan="cp"]');
+    if (!card) return;
+    centerPlanCard(card, "auto");
+    updatePagination(card.closest(".plan-card-track"));
   };
 
   const scheduleInitialCenter = () => requestAnimationFrame(() => requestAnimationFrame(centerInitialPlan));
@@ -259,6 +314,10 @@ export function initCalculator(root, content) {
     const planButton = event.target.closest("[data-plan]");
     if (planButton) {
       selectPlan(planButton.dataset.plan);
+      centerPlanCard(planButton);
+      window.setTimeout(() => {
+        root.querySelector("#petStep")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      }, 320);
       return;
     }
     const speciesButton = event.target.closest("[data-species]");
@@ -292,6 +351,7 @@ export function initCalculator(root, content) {
   });
 
   render();
+  setupPlanCarousels();
   scheduleInitialCenter();
   document.fonts?.ready.then(scheduleInitialCenter);
   window.addEventListener("resize", scheduleInitialCenter, { passive: true });
