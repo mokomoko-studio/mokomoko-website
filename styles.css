@@ -487,8 +487,28 @@ ul {
 
 .hero-background {
   inset: -30px 0;
-  transform: translate3d(0, var(--hero-parallax-y, 0), 0);
+  transform: translate3d(
+    var(--hero-mouse-parallax-x, 0px),
+    calc(var(--hero-scroll-parallax-y, 0px) + var(--hero-mouse-parallax-y, 0px)),
+    0
+  );
   will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero h1 {
+    transform: translate3d(
+      var(--hero-title-mouse-x, 0px),
+      var(--hero-title-mouse-y, 0px),
+      0
+    );
+    will-change: transform;
+  }
+
+  .hero.is-mouse-parallax-resetting .hero-background,
+  .hero.is-mouse-parallax-resetting h1 {
+    transition: transform 260ms ease-out;
+  }
 }
 
 .hero h1 {

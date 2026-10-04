@@ -241,7 +241,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     const update = () => {
       frame = 0;
       const progress = Math.max(0, Math.min(hero.offsetHeight, -hero.getBoundingClientRect().top));
-      background.style.setProperty("--hero-parallax-y", `${Math.min(28, progress * 0.04)}px`);
+      background.style.setProperty("--hero-scroll-parallax-y", `${Math.min(28, progress * 0.04)}px`);
     };
     const requestUpdate = () => {
       if (frame) return;
@@ -251,6 +251,46 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     update();
     window.addEventListener("scroll", requestUpdate, { passive: true });
     window.addEventListener("resize", requestUpdate, { passive: true });
+  };
+
+  const initHeroMouseParallax = () => {
+    const hero = root.querySelector(".hero");
+    const background = hero?.querySelector(".hero-background");
+    const title = hero?.querySelector("h1");
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!hero || !background || !title || !finePointer.matches || reducedMotion.matches) return;
+
+    let frame = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+
+    const render = () => {
+      frame = 0;
+      background.style.setProperty("--hero-mouse-parallax-x", `${pointerX * 8}px`);
+      background.style.setProperty("--hero-mouse-parallax-y", `${pointerY * 6}px`);
+      title.style.setProperty("--hero-title-mouse-x", `${pointerX * -4}px`);
+      title.style.setProperty("--hero-title-mouse-y", `${pointerY * -3}px`);
+    };
+
+    const requestRender = () => {
+      if (!frame) frame = requestAnimationFrame(render);
+    };
+
+    hero.addEventListener("pointermove", (event) => {
+      const bounds = hero.getBoundingClientRect();
+      pointerX = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1));
+      pointerY = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1));
+      hero.classList.remove("is-mouse-parallax-resetting");
+      requestRender();
+    }, { passive: true });
+
+    hero.addEventListener("pointerleave", () => {
+      pointerX = 0;
+      pointerY = 0;
+      hero.classList.add("is-mouse-parallax-resetting");
+      requestRender();
+    }, { passive: true });
   };
 
   const initScrollReveal = () => {
@@ -289,6 +329,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     initCalculator(document.getElementById(content.integrations.calculator.mountId), content);
     initBookingForm(document.getElementById(content.integrations.bookingForm.mountId), content);
     initHeroParallax();
+    initHeroMouseParallax();
     initScrollReveal();
     initEditor();
   };
