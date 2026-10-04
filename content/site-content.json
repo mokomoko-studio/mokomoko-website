@@ -51,11 +51,15 @@
   ],
   "philosophy": {
     "title": "⋆⸜ 品牌理念 ౨ৎ",
-    "definition": "モコモコ 形容毛茸茸，像棉花、雲朵的小動物",
-    "firstBlock": ["以獨特柔和的眼光", "捕捉每一幀生活中細微的美好", "注重飼主與毛孩間的真摯情感", "自然而細膩的互動讓畫面更具紀念", "在往後的日子感受到深層次的共鳴"],
-    "secondTitle": "日系清新色調",
-    "secondBlock": ["毛孩輕輕步入我們的生命裡", "愛與離別正同時進行", "無畏無懼的寶寶／活潑貪玩的朋友", "／沈穩安詳的老伴", "透過我手中的單眼，紀錄每一個階段性的成長", "在片刻的平靜創造出觸動人心的時光"],
-    "closing": "放慢腳步 細心生活"
+    "lines": ["從年幼、成長，到慢慢變老", "記錄每個階段，屬於牠的生活痕跡"],
+    "works": [
+      { "path": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
+      { "path": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
+      { "path": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
+      { "path": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
+      { "path": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
+      { "path": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品預覽" }
+    ]
   },
   "photographyTypes": {
     "title": "⋆⸜ 攝影方案 ౨ৎ",
