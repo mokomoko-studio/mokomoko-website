@@ -33,6 +33,11 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
   const renderLines = (lines, path, className = "copy-lines") => `
     <div class="${className}">${lines.map((line, index) => `<p${editAttr(`${path}.${index}`)}>${escapeHtml(line)}</p>`).join("")}</div>`;
 
+  const renderHighlightedText = (line, highlights = []) => highlights.reduce(
+    (html, highlight) => html.replace(escapeHtml(highlight), `<mark class="booking-highlight">${escapeHtml(highlight)}</mark>`),
+    escapeHtml(line),
+  );
+
   const renderImage = (image, className) => image.path
     ? `<div class="${className}"><img src="${safeImageUrl(image.path)}" alt="${escapeHtml(image.alt)}"></div>`
     : `<div class="${className} image-placeholder" role="img" aria-label="${escapeHtml(image.alt)}"><small>${escapeHtml(image.placeholder)}</small></div>`;
@@ -95,11 +100,17 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
           <p${editAttr("philosophy.lines.1")}>${escapeHtml(section.lines[1])}</p>
         </div>
         <div class="philosophy-gallery" aria-label="作品照片預覽">
-          <div class="philosophy-gallery-drag">
+          ${[section.gallery.row1, section.gallery.row2].map((images, rowIndex) => `<div class="philosophy-gallery-row" data-gallery-row="${rowIndex}" data-direction="${rowIndex ? "1" : "-1"}">
             <div class="philosophy-gallery-track">
-              ${[false, true].map((duplicate) => `<div class="philosophy-gallery-group"${duplicate ? ' aria-hidden="true"' : ""}>${section.works.map((image) => `<img src="${safeImageUrl(image.path)}" alt="${duplicate ? "" : escapeHtml(image.alt)}" loading="lazy" draggable="false">`).join("")}</div>`).join("")}
+              ${[false, true].map((duplicate) => `<div class="philosophy-gallery-group"${duplicate ? ' aria-hidden="true"' : ""}>${images.map((image, imageIndex) => `<button class="philosophy-polaroid" type="button" data-gallery-index="${rowIndex * 10 + imageIndex}"${duplicate ? ' tabindex="-1" aria-hidden="true"' : ` aria-label="放大查看${escapeHtml(image.alt)}"`}><img src="${safeImageUrl(image.src)}" alt="${duplicate ? "" : escapeHtml(image.alt)}" ${imageIndex < 3 ? "" : 'loading="lazy" '}decoding="async" draggable="false"></button>`).join("")}</div>`).join("")}
             </div>
-          </div>
+          </div>`).join("")}
+        </div>
+        <div class="philosophy-lightbox" role="dialog" aria-modal="true" aria-label="作品照片預覽" hidden>
+          <button class="philosophy-lightbox-close" type="button" aria-label="關閉照片預覽">×</button>
+          <button class="philosophy-lightbox-nav philosophy-lightbox-prev" type="button" aria-label="上一張照片">‹</button>
+          <div class="philosophy-lightbox-frame"><img alt="" draggable="false"></div>
+          <button class="philosophy-lightbox-nav philosophy-lightbox-next" type="button" aria-label="下一張照片">›</button>
         </div>
       </div>
     </section>`;
@@ -141,7 +152,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
           ${booking.intro?.length ? renderLines(booking.intro, "booking.intro", "copy-lines section-description") : ""}
         </div>
         <p class="outline-pill centered"${editAttr("booking.pill")}>${escapeHtml(booking.pill)}</p>
-        <ol class="booking-notes">${booking.notes.map((note, index) => `<li><span>${escapeHtml(note.number)}</span><div>${note.lines.map((line, lineIndex) => `<p${editAttr(`booking.notes.${index}.lines.${lineIndex}`)}>${escapeHtml(line)}</p>`).join("")}</div></li>`).join("")}</ol>
+        <ol class="booking-notes">${booking.notes.map((note, index) => `<li><span>${escapeHtml(note.number)}</span><div>${note.lines.map((line, lineIndex) => `<p${editAttr(`booking.notes.${index}.lines.${lineIndex}`)}>${renderHighlightedText(line, note.highlights)}</p>`).join("")}</div></li>`).join("")}</ol>
         ${booking.prompt ? `<p class="booking-prompt centered"${editAttr("booking.prompt")}>${escapeHtml(booking.prompt)}</p>` : ""}
       </div>
     </section>
@@ -300,77 +311,157 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
 
   const initPhilosophyGallery = () => {
     const gallery = root.querySelector(".philosophy-gallery");
-    const dragLayer = gallery?.querySelector(".philosophy-gallery-drag");
-    const track = gallery?.querySelector(".philosophy-gallery-track");
-    const groups = track ? [...track.querySelectorAll(".philosophy-gallery-group")] : [];
-    if (!gallery || !dragLayer || !track || groups.length < 2) return;
+    const lightbox = root.querySelector(".philosophy-lightbox");
+    if (!gallery || !lightbox) return;
+    document.body.append(lightbox);
 
-    let startX = 0;
-    let startY = 0;
-    let dragOffset = 0;
-    let baseOffset = 0;
-    let activePointer = null;
-    let gesture = "pending";
-    let resumeTimer = 0;
+    const rows = [...gallery.querySelectorAll(".philosophy-gallery-row")].map((row) => ({
+      row,
+      track: row.querySelector(".philosophy-gallery-track"),
+      groups: [...row.querySelectorAll(".philosophy-gallery-group")],
+      direction: Number(row.dataset.direction),
+      offset: 0,
+      loopWidth: 0,
+      pausedUntil: 0,
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      startOffset: 0,
+      gesture: "idle",
+      moved: false,
+      suppressClickUntil: 0,
+    }));
+    const originals = [...gallery.querySelectorAll(".philosophy-gallery-group:not([aria-hidden]) .philosophy-polaroid")];
+    const images = originals.map((button) => button.querySelector("img"));
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let previousTime = performance.now();
+    let frameId = 0;
+    let lightboxIndex = 0;
+    let lightboxPointerX = null;
+    let returnFocus = null;
+    let lockedScrollY = 0;
 
-    const animation = track.getAnimations()[0] || null;
-    const setOffset = () => dragLayer.style.setProperty("--philosophy-drag-x", `${dragOffset}px`);
-
-    const resume = () => {
-      if (animation) {
-        const loopDistance = groups[1].offsetLeft - groups[0].offsetLeft;
-        const duration = Number(animation.effect.getTiming().duration);
-        if (loopDistance > 0 && duration > 0) {
-          const currentTime = Number(animation.currentTime) || 0;
-          animation.currentTime = ((currentTime - (dragOffset / loopDistance) * duration) % duration + duration) % duration;
+    const measure = () => rows.forEach((state) => {
+      state.loopWidth = state.groups[1].offsetLeft - state.groups[0].offsetLeft;
+      if (state.loopWidth) state.offset = ((state.offset % state.loopWidth) + state.loopWidth) % state.loopWidth;
+    });
+    const renderRows = () => rows.forEach((state) => {
+      const distance = state.direction < 0 ? -state.offset : state.offset - state.loopWidth;
+      state.track.style.transform = `translate3d(${distance}px, 0, 0)`;
+    });
+    const animate = (time) => {
+      const delta = Math.min(time - previousTime, 40);
+      previousTime = time;
+      if (!reducedMotion.matches) rows.forEach((state) => {
+        if (state.pointerId === null && time >= state.pausedUntil && state.loopWidth) {
+          state.offset = (state.offset + delta * 0.025) % state.loopWidth;
         }
-      }
-      dragOffset = 0;
-      setOffset();
-      animation?.play();
+      });
+      renderRows();
+      frameId = requestAnimationFrame(animate);
     };
 
-    gallery.addEventListener("pointerdown", (event) => {
-      window.clearTimeout(resumeTimer);
-      startX = event.clientX;
-      startY = event.clientY;
-      baseOffset = dragOffset;
-      activePointer = event.pointerId;
-      gesture = "pending";
-    });
-
-    gallery.addEventListener("pointermove", (event) => {
-      if (event.pointerId !== activePointer || gesture === "vertical") return;
-      const deltaX = event.clientX - startX;
-      const deltaY = event.clientY - startY;
-
-      if (gesture === "pending" && Math.max(Math.abs(deltaX), Math.abs(deltaY)) > 4) {
-        gesture = Math.abs(deltaX) > Math.abs(deltaY) ? "horizontal" : "vertical";
-        if (gesture === "horizontal") {
-          animation?.pause();
-          gallery.classList.add("is-dragging");
-          gallery.setPointerCapture(event.pointerId);
-        }
-      }
-
-      if (gesture !== "horizontal") return;
-      event.preventDefault();
-      dragOffset = baseOffset + deltaX;
-      setOffset();
-    });
-
-    const endDrag = (event) => {
-      if (event.pointerId !== activePointer) return;
-      const wasHorizontal = gesture === "horizontal";
-      if (wasHorizontal && gallery.hasPointerCapture(event.pointerId)) gallery.releasePointerCapture(event.pointerId);
-      gallery.classList.remove("is-dragging");
-      activePointer = null;
-      gesture = "pending";
-      if (wasHorizontal) resumeTimer = window.setTimeout(resume, 1500);
+    const openLightbox = (index, trigger) => {
+      lightboxIndex = index;
+      returnFocus = trigger;
+      lockedScrollY = window.scrollY;
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.classList.add("gallery-lightbox-open");
+      lightbox.hidden = false;
+      const image = lightbox.querySelector("img");
+      image.src = images[index].currentSrc || images[index].src;
+      image.alt = images[index].alt;
+      lightbox.querySelector(".philosophy-lightbox-close").focus();
+    };
+    const showLightboxImage = (step) => {
+      lightboxIndex = (lightboxIndex + step + images.length) % images.length;
+      const image = lightbox.querySelector("img");
+      image.src = images[lightboxIndex].currentSrc || images[lightboxIndex].src;
+      image.alt = images[lightboxIndex].alt;
+    };
+    const closeLightbox = () => {
+      if (lightbox.hidden) return;
+      lightbox.hidden = true;
+      document.body.classList.remove("gallery-lightbox-open");
+      document.body.style.top = "";
+      window.scrollTo(0, lockedScrollY);
+      returnFocus?.focus();
     };
 
-    gallery.addEventListener("pointerup", endDrag);
-    gallery.addEventListener("pointercancel", endDrag);
+    rows.forEach((state) => {
+      state.row.addEventListener("pointerdown", (event) => {
+        state.pointerId = event.pointerId;
+        state.startX = event.clientX;
+        state.startY = event.clientY;
+        state.startOffset = state.offset;
+        state.gesture = "pending";
+        state.moved = false;
+        state.pausedUntil = Infinity;
+      });
+      state.row.addEventListener("pointermove", (event) => {
+        if (event.pointerId !== state.pointerId || state.gesture === "vertical") return;
+        const deltaX = event.clientX - state.startX;
+        const deltaY = event.clientY - state.startY;
+        if (state.gesture === "pending" && Math.max(Math.abs(deltaX), Math.abs(deltaY)) > 7) {
+          state.gesture = Math.abs(deltaX) > Math.abs(deltaY) ? "horizontal" : "vertical";
+          if (state.gesture === "horizontal") {
+            state.moved = true;
+            state.row.classList.add("is-dragging");
+            state.row.setPointerCapture(event.pointerId);
+          } else {
+            state.pausedUntil = performance.now() + 900;
+          }
+        }
+        if (state.gesture !== "horizontal") return;
+        event.preventDefault();
+        state.offset = state.startOffset + deltaX * state.direction;
+        if (state.loopWidth) state.offset = ((state.offset % state.loopWidth) + state.loopWidth) % state.loopWidth;
+      });
+      const endDrag = (event) => {
+        if (event.pointerId !== state.pointerId) return;
+        if (state.row.hasPointerCapture(event.pointerId)) state.row.releasePointerCapture(event.pointerId);
+        state.row.classList.remove("is-dragging");
+        state.pointerId = null;
+        state.pausedUntil = performance.now() + 900;
+        if (state.moved) state.suppressClickUntil = performance.now() + 100;
+        window.setTimeout(() => { state.moved = false; }, 0);
+      };
+      state.row.addEventListener("pointerup", endDrag);
+      state.row.addEventListener("pointercancel", endDrag);
+      state.row.addEventListener("click", (event) => {
+        const button = event.target.closest(".philosophy-polaroid");
+        if (!button || button.closest('[aria-hidden="true"]')) return;
+        event.preventDefault();
+        if (state.moved || performance.now() < state.suppressClickUntil) return;
+        openLightbox(Number(button.dataset.galleryIndex), button);
+      });
+    });
+
+    lightbox.querySelector(".philosophy-lightbox-close").addEventListener("click", closeLightbox);
+    lightbox.querySelector(".philosophy-lightbox-prev").addEventListener("click", () => showLightboxImage(-1));
+    lightbox.querySelector(".philosophy-lightbox-next").addEventListener("click", () => showLightboxImage(1));
+    lightbox.addEventListener("click", (event) => { if (event.target === lightbox) closeLightbox(); });
+    lightbox.addEventListener("pointerdown", (event) => { lightboxPointerX = event.clientX; });
+    lightbox.addEventListener("pointerup", (event) => {
+      if (lightboxPointerX === null) return;
+      const delta = event.clientX - lightboxPointerX;
+      if (Math.abs(delta) > 45) showLightboxImage(delta < 0 ? 1 : -1);
+      lightboxPointerX = null;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (lightbox.hidden) return;
+      if (event.key === "Escape") closeLightbox();
+      if (event.key === "ArrowLeft") showLightboxImage(-1);
+      if (event.key === "ArrowRight") showLightboxImage(1);
+    });
+    window.addEventListener("resize", measure, { passive: true });
+    requestAnimationFrame(() => {
+      measure();
+      rows[1].offset = rows[1].loopWidth * 0.5;
+      renderRows();
+      frameId = requestAnimationFrame(animate);
+    });
+    window.addEventListener("pagehide", () => cancelAnimationFrame(frameId), { once: true });
   };
 
   const initScrollReveal = () => {

@@ -228,50 +228,137 @@ ul {
 }
 
 .philosophy-gallery {
-  --philosophy-gallery-gap: var(--space-sm);
-  --philosophy-gallery-size: clamp(8.5rem, 40vw, 11rem);
+  --gallery-polaroid-width: clamp(8.75rem, 20vw, 13rem);
+  --gallery-gap: var(--space-md);
+  --gallery-row-gap: var(--space-lg);
+  --gallery-polaroid-padding: clamp(0.35rem, 0.8vw, 0.55rem);
+  --gallery-polaroid-bottom-padding: clamp(0.85rem, 1.5vw, 1.2rem);
   width: min(calc(100vw - (var(--page-padding) * 2)), 68rem);
   margin: var(--space-xl) 0 0 50%;
   overflow: hidden;
-  cursor: grab;
-  touch-action: pan-y;
   transform: translateX(-50%);
   user-select: none;
 }
 
-.philosophy-gallery.is-dragging {
-  cursor: grabbing;
+.philosophy-gallery-row {
+  width: 100%;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
 }
 
-.philosophy-gallery-drag {
-  width: max-content;
-  transform: translate3d(var(--philosophy-drag-x, 0px), 0, 0);
+.philosophy-gallery-row + .philosophy-gallery-row {
+  margin-top: var(--gallery-row-gap);
+}
+
+.philosophy-gallery-row.is-dragging {
+  cursor: grabbing;
 }
 
 .philosophy-gallery-track,
 .philosophy-gallery-group {
   display: flex;
   flex: none;
-  gap: var(--philosophy-gallery-gap);
+  gap: var(--gallery-gap);
   width: max-content;
 }
 
 .philosophy-gallery-track {
-  animation: philosophy-gallery-scroll 70s linear infinite;
   will-change: transform;
 }
 
-.philosophy-gallery img {
+.philosophy-polaroid {
   display: block;
-  flex: 0 0 var(--philosophy-gallery-size);
-  width: var(--philosophy-gallery-size);
-  aspect-ratio: 1;
+  flex: 0 0 var(--gallery-polaroid-width);
+  width: var(--gallery-polaroid-width);
+  margin: 0;
+  padding: var(--gallery-polaroid-padding) var(--gallery-polaroid-padding) var(--gallery-polaroid-bottom-padding);
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--color-surface, #fffdf9);
+  box-shadow: 0 0.35rem 1rem rgb(74 63 55 / 8%);
+  cursor: inherit;
+  transition: transform 220ms ease-out;
+}
+
+.philosophy-polaroid:nth-child(4n + 1) { rotate: -1deg; }
+.philosophy-polaroid:nth-child(4n + 2) { rotate: 0.5deg; }
+.philosophy-polaroid:nth-child(4n + 3) { rotate: -0.5deg; }
+.philosophy-polaroid:nth-child(4n) { rotate: 1deg; }
+
+.philosophy-polaroid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
 }
 
-@keyframes philosophy-gallery-scroll {
-  to {
-    transform: translate3d(calc(-50% - (var(--philosophy-gallery-gap) / 2)), 0, 0);
+.philosophy-lightbox[hidden] {
+  display: none;
+}
+
+.philosophy-lightbox {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(2.75rem, 1fr) minmax(0, auto) minmax(2.75rem, 1fr);
+  align-items: center;
+  background: rgb(31 36 38 / 82%);
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.philosophy-lightbox-frame {
+  max-width: 90vw;
+  max-height: 88vh;
+  padding: clamp(0.3rem, 1vw, 0.5rem);
+  border-radius: 0.35rem;
+  background: var(--color-surface, #fffdf9);
+}
+
+.philosophy-lightbox-frame img {
+  display: block;
+  max-width: calc(90vw - 1rem);
+  max-height: calc(88vh - 1rem);
+  object-fit: contain;
+}
+
+.philosophy-lightbox-close,
+.philosophy-lightbox-nav {
+  border: 0;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+}
+
+.philosophy-lightbox-close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 2rem;
+}
+
+.philosophy-lightbox-nav {
+  min-width: 2.75rem;
+  min-height: 3.5rem;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+}
+
+.philosophy-lightbox-prev { justify-self: end; }
+.philosophy-lightbox-next { justify-self: start; }
+
+body.gallery-lightbox-open {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .philosophy-polaroid:hover {
+    transform: translateY(-3px) scale(1.015);
   }
 }
 
@@ -1072,6 +1159,67 @@ ul {
   right: 0.8rem;
 }
 
+.plan-christmas-decor {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.plan-christmas-decor svg {
+  position: absolute;
+  width: 1.65rem;
+  height: 1.65rem;
+  overflow: visible;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.plan-christmas-decor .decor-gift {
+  top: -0.65rem;
+  left: 1.65rem;
+  color: var(--color-error);
+}
+
+.plan-christmas-decor .decor-candy {
+  top: 2.75rem;
+  right: -0.55rem;
+  color: var(--color-error);
+}
+
+.plan-christmas-decor .decor-snow {
+  bottom: 2.25rem;
+  left: -0.55rem;
+  color: var(--color-blue-mid);
+}
+
+.plan-christmas-decor .decor-star {
+  top: -0.55rem;
+  right: 1.8rem;
+  color: var(--color-yellow-strong);
+  fill: color-mix(in srgb, var(--color-yellow) 70%, transparent);
+}
+
+.plan-christmas-decor .decor-holly {
+  right: 1.15rem;
+  bottom: -0.65rem;
+  color: var(--color-blue-deep);
+}
+
+.plan-christmas-decor .decor-ribbon {
+  bottom: -0.65rem;
+  left: 1.5rem;
+  color: var(--color-pink);
+}
+
+.limited-plan-group .plan-selector > :not(.plan-christmas-decor) {
+  z-index: 2;
+}
+
 .plan-selector.has-plan-pet {
   padding-top: calc(var(--space-md) + var(--space-sm));
 }
@@ -1360,7 +1508,8 @@ ul {
 }
 
 .pricing-rules summary {
-  display: flex;
+  display: inline-flex;
+  width: 100%;
   min-height: 48px;
   align-items: center;
   justify-content: center;
@@ -1377,7 +1526,10 @@ ul {
 }
 
 .pricing-rules-icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
   margin-right: var(--space-xs);
   color: var(--color-blue-deep);
   font-size: 1.2em;
@@ -1631,6 +1783,12 @@ ul {
 
 .booking-notes p {
   margin-bottom: 0.2rem;
+}
+
+.booking-highlight {
+  padding-inline: 0.06em;
+  background: linear-gradient(transparent 42%, color-mix(in srgb, var(--color-yellow) 82%, transparent) 42%, color-mix(in srgb, var(--color-yellow) 82%, transparent) 88%, transparent 88%);
+  color: inherit;
 }
 
 .booking-prompt {
@@ -2188,6 +2346,20 @@ ul {
     --space-card: 1.125rem;
     --page-padding: 1.375rem;
     --button-height: 46px;
+  }
+
+  .philosophy-gallery {
+    --gallery-polaroid-width: clamp(8.125rem, 36vw, 9.375rem);
+    --gallery-row-gap: 1.25rem;
+  }
+
+  .philosophy-lightbox {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .philosophy-lightbox-nav {
+    display: none;
   }
 
   body {
