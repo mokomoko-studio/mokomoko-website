@@ -220,14 +220,16 @@ ul {
 }
 
 .philosophy-label {
-  width: min(100%, 24rem);
+  width: fit-content;
+  max-width: 100%;
   margin: var(--space-lg) auto 0;
-  padding: 1.05rem 0.75rem 0.85rem;
-  border: 1px solid var(--color-border);
-  border-radius: 50% 50% 0.7rem 0.7rem / 1.8rem 1.8rem 0.7rem 0.7rem;
+  padding-inline: 0.2rem;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(177deg, transparent 31%, color-mix(in srgb, var(--color-yellow) 72%, transparent) 32%, color-mix(in srgb, var(--color-yellow) 72%, transparent) 79%, transparent 80%);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-size: clamp(0.68rem, 2.8vw, var(--text-small));
+  font-size: clamp(0.64rem, 2.8vw, var(--text-small));
   font-weight: 400;
   letter-spacing: 0.025em;
   line-height: 1.65;
