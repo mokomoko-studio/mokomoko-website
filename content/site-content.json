@@ -52,14 +52,32 @@
   "philosophy": {
     "title": "⋆⸜ 品牌理念 ౨ৎ",
     "lines": ["從年幼、成長，到慢慢變老", "記錄每個階段，屬於牠的生活痕跡"],
-    "works": [
-      { "path": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
-      { "path": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
-      { "path": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
-      { "path": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
-      { "path": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品預覽" },
-      { "path": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品預覽" }
-    ]
+    "gallery": {
+      "row1": [
+        { "src": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品 01" },
+        { "src": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品 02" },
+        { "src": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品 03" },
+        { "src": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品 04" },
+        { "src": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品 05" },
+        { "src": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品 06" },
+        { "src": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品 07" },
+        { "src": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品 08" },
+        { "src": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品 09" },
+        { "src": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品 10" }
+      ],
+      "row2": [
+        { "src": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品 11" },
+        { "src": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品 12" },
+        { "src": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品 13" },
+        { "src": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品 14" },
+        { "src": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品 15" },
+        { "src": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品 16" },
+        { "src": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品 17" },
+        { "src": "./assets/hero-mobile-20261004.png", "alt": "MOKOMOKO 寵物攝影作品 18" },
+        { "src": "./assets/hero-shiba-scene.png", "alt": "MOKOMOKO 寵物攝影作品 19" },
+        { "src": "./assets/hero-mobile.png", "alt": "MOKOMOKO 寵物攝影作品 20" }
+      ]
+    }
   },
   "photographyTypes": {
     "title": "⋆⸜ 攝影方案 ౨ৎ",
@@ -223,12 +241,11 @@
     "intro": [],
     "pill": "⁺˖ 女攝影師 小魚 ｜ 療癒系寫真 🫧 ͛.*",
     "notes": [
-      { "number": "①", "lines": ["戶外拍攝地點以雙北地區為主", "外縣市及雙北部分偏遠地區須加收交通費", "（南下交通方式為高鐵與計程車轉乘，當日來回費用）"] },
+      { "number": "①", "lines": ["戶外拍攝地點以雙北地區為主", "外縣市及雙北部分偏遠地區須加收交通費", "（南下交通方式為高鐵與計程車轉乘，當日來回費用）"], "highlights": ["雙北地區"] },
       { "number": "②", "lines": ["假日人潮多，建議挑選平日時段"] },
-      { "number": "③", "lines": ["當天陪同人數至多四位", "以免影響拍攝進度"] },
-      { "number": "④", "lines": ["歡迎入鏡合照", "建議穿著淡色系素色服裝"] },
-      { "number": "⑤", "lines": ["確認拍攝日期後請於三天內完成匯款", "逾期不保留檔期"] },
-      { "number": "⑥", "lines": ["MOKOMOKO 有使用肖像之權利", "可於各平台分享之用途，不方便露臉請事前告知"] }
+      { "number": "③", "lines": ["當天陪同人數至多四位", "歡迎入鏡合照", "建議穿著淡色系服裝"], "highlights": ["至多四位", "淡色系"] },
+      { "number": "④", "lines": ["確認拍攝日期後請於三天內完成匯款", "逾期不保留檔期"], "highlights": ["三天內"] },
+      { "number": "⑤", "lines": ["MOKOMOKO 有使用肖像之權利", "可於各平台分享之用途，不方便露臉請事前告知"] }
     ]
   },
   "bookingCta": {
@@ -239,14 +256,14 @@
   },
   "closing": {
     "title": "",
-    "lines": ["感謝您的填寫，待攝影師與您討論", "拍攝之地點與時段", "毛孩本身若有特殊狀況，務必提前告知", "匯款後才正式保留拍攝檔期"]
+    "lines": ["毛孩本身若有特殊狀況，務必提前告知", "匯款後才正式保留拍攝檔期"]
   },
   "calculator": {
     "title": "⋆⸜ 拍攝方案與費用 ౨ৎ",
     "subtitle": "＼現在可以即時查看預估費用啦～！／",
     "planHelper": "點選後會顯示適用的拍攝對象與費用條件。",
     "conditionHelper": "第二隻毛孩 +NT$500、攝影棚費 +NT$1000／hr",
-    "shootingInfo": ["戶外拍攝｜狗／貓（已受外出降敏訓練）　室內棚拍｜貓／特寵", "拍攝時間｜戶外約 1.5 小時・室內約 2 小時"],
+    "shootingInfo": ["戶外拍攝｜狗／貓（已受外出降敏訓練）", "室內棚拍｜貓／特寵"],
     "limitedHeading": "✦ 期間限定 ✦ 今年才有！",
     "limitedDates": ["今年的聖誕回憶和毛孩一起收藏", "拍攝期間 11/1–12/10（預約截止 10/31）"],
     "regularHeading": "✦ 常態拍攝方案 ✦",
