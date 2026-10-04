@@ -90,12 +90,17 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       <div class="content narrow centered">
         <p class="section-kicker">OUR PHILOSOPHY</p>
         <h2 id="philosophy-title" class="section-title"${editAttr("philosophy.title")}>${escapeHtml(section.title)}</h2>
-        <p class="outline-pill"${editAttr("philosophy.definition")}>${escapeHtml(section.definition)}</p>
-        ${renderLines(section.firstBlock, "philosophy.firstBlock")}
-        <div class="divider" aria-hidden="true"></div>
-        <h3 class="subsection-title"${editAttr("philosophy.secondTitle")}>${escapeHtml(section.secondTitle)}</h3>
-        ${renderLines(section.secondBlock, "philosophy.secondBlock")}
-        <p class="closing-line"${editAttr("philosophy.closing")}>${escapeHtml(section.closing)}</p>
+        <div class="philosophy-copy">
+          <p${editAttr("philosophy.lines.0")}>${escapeHtml(section.lines[0])}</p>
+          <p${editAttr("philosophy.lines.1")}>${escapeHtml(section.lines[1])}</p>
+        </div>
+        <div class="philosophy-gallery" aria-label="作品照片預覽">
+          <div class="philosophy-gallery-drag">
+            <div class="philosophy-gallery-track">
+              ${[false, true].map((duplicate) => `<div class="philosophy-gallery-group"${duplicate ? ' aria-hidden="true"' : ""}>${section.works.map((image) => `<img src="${safeImageUrl(image.path)}" alt="${duplicate ? "" : escapeHtml(image.alt)}" loading="lazy" draggable="false">`).join("")}</div>`).join("")}
+            </div>
+          </div>
+        </div>
       </div>
     </section>`;
 
@@ -293,6 +298,81 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     }, { passive: true });
   };
 
+  const initPhilosophyGallery = () => {
+    const gallery = root.querySelector(".philosophy-gallery");
+    const dragLayer = gallery?.querySelector(".philosophy-gallery-drag");
+    const track = gallery?.querySelector(".philosophy-gallery-track");
+    const groups = track ? [...track.querySelectorAll(".philosophy-gallery-group")] : [];
+    if (!gallery || !dragLayer || !track || groups.length < 2) return;
+
+    let startX = 0;
+    let startY = 0;
+    let dragOffset = 0;
+    let baseOffset = 0;
+    let activePointer = null;
+    let gesture = "pending";
+    let resumeTimer = 0;
+
+    const animation = track.getAnimations()[0] || null;
+    const setOffset = () => dragLayer.style.setProperty("--philosophy-drag-x", `${dragOffset}px`);
+
+    const resume = () => {
+      if (animation) {
+        const loopDistance = groups[1].offsetLeft - groups[0].offsetLeft;
+        const duration = Number(animation.effect.getTiming().duration);
+        if (loopDistance > 0 && duration > 0) {
+          const currentTime = Number(animation.currentTime) || 0;
+          animation.currentTime = ((currentTime - (dragOffset / loopDistance) * duration) % duration + duration) % duration;
+        }
+      }
+      dragOffset = 0;
+      setOffset();
+      animation?.play();
+    };
+
+    gallery.addEventListener("pointerdown", (event) => {
+      window.clearTimeout(resumeTimer);
+      startX = event.clientX;
+      startY = event.clientY;
+      baseOffset = dragOffset;
+      activePointer = event.pointerId;
+      gesture = "pending";
+    });
+
+    gallery.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== activePointer || gesture === "vertical") return;
+      const deltaX = event.clientX - startX;
+      const deltaY = event.clientY - startY;
+
+      if (gesture === "pending" && Math.max(Math.abs(deltaX), Math.abs(deltaY)) > 4) {
+        gesture = Math.abs(deltaX) > Math.abs(deltaY) ? "horizontal" : "vertical";
+        if (gesture === "horizontal") {
+          animation?.pause();
+          gallery.classList.add("is-dragging");
+          gallery.setPointerCapture(event.pointerId);
+        }
+      }
+
+      if (gesture !== "horizontal") return;
+      event.preventDefault();
+      dragOffset = baseOffset + deltaX;
+      setOffset();
+    });
+
+    const endDrag = (event) => {
+      if (event.pointerId !== activePointer) return;
+      const wasHorizontal = gesture === "horizontal";
+      if (wasHorizontal && gallery.hasPointerCapture(event.pointerId)) gallery.releasePointerCapture(event.pointerId);
+      gallery.classList.remove("is-dragging");
+      activePointer = null;
+      gesture = "pending";
+      if (wasHorizontal) resumeTimer = window.setTimeout(resume, 1500);
+    };
+
+    gallery.addEventListener("pointerup", endDrag);
+    gallery.addEventListener("pointercancel", endDrag);
+  };
+
   const initScrollReveal = () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
 
@@ -330,6 +410,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     initBookingForm(document.getElementById(content.integrations.bookingForm.mountId), content);
     initHeroParallax();
     initHeroMouseParallax();
+    initPhilosophyGallery();
     initScrollReveal();
     initEditor();
   };

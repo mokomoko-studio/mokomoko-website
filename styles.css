@@ -219,6 +219,62 @@ ul {
   margin-bottom: 0.35rem;
 }
 
+.philosophy-copy {
+  margin-top: var(--space-lg);
+}
+
+.philosophy-copy p {
+  margin-bottom: var(--space-xs);
+}
+
+.philosophy-gallery {
+  --philosophy-gallery-gap: var(--space-sm);
+  --philosophy-gallery-size: clamp(8.5rem, 40vw, 11rem);
+  width: min(calc(100vw - (var(--page-padding) * 2)), 68rem);
+  margin: var(--space-xl) 0 0 50%;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  transform: translateX(-50%);
+  user-select: none;
+}
+
+.philosophy-gallery.is-dragging {
+  cursor: grabbing;
+}
+
+.philosophy-gallery-drag {
+  width: max-content;
+  transform: translate3d(var(--philosophy-drag-x, 0px), 0, 0);
+}
+
+.philosophy-gallery-track,
+.philosophy-gallery-group {
+  display: flex;
+  flex: none;
+  gap: var(--philosophy-gallery-gap);
+  width: max-content;
+}
+
+.philosophy-gallery-track {
+  animation: philosophy-gallery-scroll 70s linear infinite;
+  will-change: transform;
+}
+
+.philosophy-gallery img {
+  display: block;
+  flex: 0 0 var(--philosophy-gallery-size);
+  width: var(--philosophy-gallery-size);
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+@keyframes philosophy-gallery-scroll {
+  to {
+    transform: translate3d(calc(-50% - (var(--philosophy-gallery-gap) / 2)), 0, 0);
+  }
+}
+
 .section-intro {
   margin-bottom: var(--space-md);
 }
@@ -1741,6 +1797,22 @@ ul {
   word-break: normal;
 }
 
+[data-field="booking-confirmation"] .booking-choice:first-child {
+  align-items: center;
+}
+
+[data-field="booking-confirmation"] .booking-choice:first-child input {
+  margin-top: 0;
+}
+
+[data-field="source"] .booking-choice {
+  align-items: center;
+}
+
+[data-field="source"] .booking-choice input {
+  margin-top: 0;
+}
+
 .booking-other {
   margin-top: 0.15rem;
 }
@@ -2087,6 +2159,11 @@ ul {
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
+  }
+
+  .philosophy-gallery-track {
+    animation: none;
+    will-change: auto;
   }
 }
 
