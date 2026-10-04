@@ -250,7 +250,8 @@ export function initCalculator(root, content) {
       note.textContent = "";
       return;
     }
-    holder.innerHTML = ["outdoor", "indoor"].map((environment) => {
+    const availableEnvironments = state.species === "exotic" ? ["indoor"] : ["outdoor", "indoor"];
+    holder.innerHTML = availableEnvironments.map((environment) => {
       const selected = state.environment === environment;
       return `<button type="button" class="text-control ${selected ? "is-selected" : ""}" data-environment="${environment}" role="radio" aria-checked="${selected}">${environment === "outdoor" ? "戶外拍攝" : "室內棚拍"}</button>`;
     }).join("");
