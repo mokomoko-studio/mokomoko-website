@@ -46,7 +46,7 @@ export function initCalculator(root, content) {
       <section id="petStep" class="pricing-step" aria-labelledby="pet-step-title" hidden>
         <div class="step-heading">
           <div class="step-title-row"><span class="step-number">02</span><h3 id="pet-step-title">拍攝對象</h3></div>
-          <p>只顯示目前方案適用的毛孩類型。</p>
+          <p>只顯示目前方案適用的毛孩類型</p>
         </div>
         <div id="speciesChoices" class="species-controls" role="radiogroup" aria-label="拍攝對象"></div>
       </section>
@@ -71,7 +71,7 @@ export function initCalculator(root, content) {
       <section id="addonStep" class="pricing-step" aria-labelledby="addon-step-title" hidden>
         <div class="step-heading">
           <div class="step-title-row"><span class="step-number">04</span><h3 id="addon-step-title">預約階段加購</h3></div>
-          <p>只有會影響本次預估費用的商品會列在這裡。</p>
+          <p>只有會影響本次預估費用的商品會列在這裡</p>
         </div>
         <div id="productCounters"></div>
       </section>
@@ -83,7 +83,7 @@ export function initCalculator(root, content) {
         </div>
         <div id="breakdown" class="pricing-breakdown" aria-live="polite"></div>
         <div class="pricing-total"><span>預估總額</span><strong id="totalAmount" aria-live="polite">NT$0</strong></div>
-        <p class="module-note">此為線上費用試算，最終拍攝安排與金額將由 MOKOMOKO 確認。</p>
+        <p class="module-note">此為線上費用試算，最終拍攝安排與金額將由攝影師確認。</p>
         <a id="reserveButton" class="primary-button is-disabled" href="#booking" aria-disabled="true">${escapeHtml(content.calculator.reserveLabel)}</a>
       </aside>
     </div>`;
@@ -250,7 +250,7 @@ export function initCalculator(root, content) {
     const plan = currentPlan();
     if (plan.group === "limited") {
       holder.innerHTML = '<div class="condition-value"><strong>室內棚拍</strong><span>此活動方案已包含 1 小時基本棚租。</span></div>';
-      note.textContent = "超出已含時數時，會依原計價規則加收棚拍費。";
+      note.textContent = "超出已含時數時，會依原計價規則加收棚拍費";
       return;
     }
     if (state.species === "dog") {
