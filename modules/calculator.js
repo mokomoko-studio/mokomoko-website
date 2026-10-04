@@ -101,6 +101,14 @@ export function initCalculator(root, content) {
     const hasImage = Boolean(plan.image?.path);
     const features = planFeatures(plan);
     return `<button type="button" class="plan-selector${hasImage ? " has-plan-pet" : ""}" data-plan="${escapeHtml(plan.id)}" role="radio" aria-checked="false">
+      ${plan.group === "limited" ? `<span class="plan-christmas-decor" aria-hidden="true">
+        <svg class="decor-gift" viewBox="0 0 32 32"><path d="M5 13h22v15H5zM3 9h26v5H3zM16 9v19M10 9c-5-3-3-8 1-6 3 1 5 6 5 6M22 9c5-3 3-8-1-6-3 1-5 6-5 6"/></svg>
+        <svg class="decor-candy" viewBox="0 0 32 32"><path d="M22 28 10 8c-4-7 7-11 11-4 3 5-4 9-7 5"/></svg>
+        <svg class="decor-snow" viewBox="0 0 32 32"><path d="M16 3v26M5 9l22 14M27 9 5 23M12 5l4 4 4-4M12 27l4-4 4 4"/></svg>
+        <svg class="decor-star" viewBox="0 0 32 32"><path d="m16 3 3.5 8.5 9.5.7-7.2 6.2 2.3 9.3-8.1-5-8.1 5 2.3-9.3L3 12.2l9.5-.7z"/></svg>
+        <svg class="decor-holly" viewBox="0 0 32 32"><path d="M15 18C7 17 4 11 6 5c6 1 10 5 10 12M17 18c8-1 11-7 9-13-6 1-10 5-10 12"/><circle cx="13" cy="20" r="3"/><circle cx="19" cy="20" r="3"/><circle cx="16" cy="24" r="3"/></svg>
+        <svg class="decor-ribbon" viewBox="0 0 32 32"><path d="M16 15C8 7 3 10 6 15c2 3 7 2 10 0Zm0 0c8-8 13-5 10 0-2 3-7 2-10 0Zm0 0-6 13 6-4 6 4z"/></svg>
+      </span>` : ""}
       <span class="plan-pet-slot${hasImage ? "" : " is-empty"}"${hasImage ? "" : ' aria-hidden="true"'}>${hasImage ? `<img class="plan-pet-image" src="${escapeHtml(plan.image.path)}" alt="${escapeHtml(plan.image.alt || "")}">` : ""}</span>
       <span class="plan-card-top">
         ${plan.badge ? `<span class="plan-badge" ${editable(`${path}.badge`)}>${escapeHtml(plan.badge)}</span>` : ""}
