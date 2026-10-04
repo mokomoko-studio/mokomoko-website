@@ -2,6 +2,7 @@
   --color-blue: #70b7f3;
   --color-blue-mid: #559ed7;
   --color-blue-deep: #477ea7;
+  --color-christmas-green: #3f6b4f;
   --color-bg: #f8f7f4;
   --color-surface: #ffffff;
   --color-soft: #efefec;
@@ -847,9 +848,8 @@ body.gallery-lightbox-open {
 }
 
 .jump-nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   width: min(100%, 560px);
   margin: 0 auto;
@@ -876,12 +876,77 @@ body.gallery-lightbox-open {
 }
 
 .jump-nav .primary {
-  flex-basis: auto;
+  position: relative;
+  overflow: hidden;
+  grid-column: 1 / -1;
   font-size: 0.78rem;
+  isolation: isolate;
+  animation: booking-cta-breathe 2.6s ease-in-out infinite;
+}
+
+.jump-nav .primary::after {
+  position: absolute;
+  z-index: 0;
+  top: -45%;
+  bottom: -45%;
+  left: -45%;
+  width: 24%;
+  background: rgb(255 255 255 / 28%);
+  content: "";
+  pointer-events: none;
+  transform: translateX(-180%) skewX(-18deg);
+  animation: booking-cta-shine 5s ease-in-out infinite;
+}
+
+.jump-nav .primary > span {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes booking-cta-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+@keyframes booking-cta-shine {
+  0%, 68% { transform: translateX(-180%) skewX(-18deg); }
+  82%, 100% { transform: translateX(760%) skewX(-18deg); }
 }
 
 .jump-nav a {
+  width: 100%;
   padding-inline: 0.8rem;
+}
+
+.return-directory {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+  z-index: 20;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-blue-deep) 32%, transparent);
+  border-radius: 50%;
+  background: var(--color-blue-deep);
+  box-shadow: 0 4px 12px rgba(46, 83, 110, 0.16);
+  color: #fff;
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 180ms ease, background-color 160ms ease;
+}
+
+.return-directory.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .primary-button.is-disabled {
@@ -1268,7 +1333,24 @@ body.gallery-lightbox-open {
 }
 
 .limited-plan-group .plan-selector {
+  height: auto;
   transform: none;
+}
+
+.limited-plan-group .plan-name {
+  color: var(--color-christmas-green);
+}
+
+.plan-selector[data-plan="guinea"].is-christmas-attention {
+  animation: christmas-card-attention 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes christmas-card-attention {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-3px) rotate(-2deg); }
+  40% { transform: translateX(3px) rotate(2deg); }
+  60% { transform: translateX(-2px) rotate(-1.3deg); }
+  80% { transform: translateX(2px) rotate(1.3deg); }
 }
 
 .plan-selector.has-plan-pet {
@@ -2045,6 +2127,8 @@ body.gallery-lightbox-open {
 .booking-submit {
   min-width: min(230px, 100%);
   margin-inline: auto;
+  background: var(--color-blue-deep);
+  color: #fff;
 }
 
 .booking-submit-area {
@@ -2089,6 +2173,21 @@ body.gallery-lightbox-open {
   .module-button:hover {
     filter: brightness(0.98);
   }
+
+  .booking-submit:hover,
+  .return-directory:hover {
+    background: var(--color-blue-mid);
+  }
+
+  .jump-nav .primary:hover {
+    animation-play-state: paused;
+    transform: scale(1.03);
+  }
+}
+
+.booking-submit:active,
+.return-directory:active {
+  background: var(--color-blue-deep);
 }
 
 .booking-success > div {
@@ -2493,6 +2592,7 @@ body.gallery-lightbox-open {
   }
 
   .jump-nav a {
+    width: 100%;
     padding-inline: 0.75rem;
   }
 
@@ -2669,5 +2769,17 @@ body.gallery-lightbox-open {
 
   .booking-submit {
     min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jump-nav .primary,
+  .jump-nav .primary::after,
+  .plan-selector[data-plan="guinea"].is-christmas-attention {
+    animation: none;
+  }
+
+  .return-directory {
+    transition: none;
   }
 }
