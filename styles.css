@@ -163,6 +163,24 @@ ul {
   transform: translateY(0);
 }
 
+.booking-notes-reveal > li {
+  opacity: 1;
+  transform: none;
+}
+
+#site-root.reveal-enabled .booking-notes-reveal > li {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 750ms cubic-bezier(0.22, 1, 0.36, 1), transform 750ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--booking-reveal-index, 0) * 120ms);
+  will-change: opacity, transform;
+}
+
+#site-root.reveal-enabled .booking-notes-reveal.is-visible > li {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .section {
   padding-block: var(--space-section-mobile);
 }
@@ -391,6 +409,10 @@ ul {
   min-width: 2.75rem;
   min-height: 3.5rem;
   font-size: clamp(2.25rem, 5vw, 3.5rem);
+}
+
+.philosophy-lightbox-nav[hidden] {
+  display: none;
 }
 
 .philosophy-lightbox-prev { justify-self: end; }
@@ -809,6 +831,12 @@ body.gallery-lightbox-open {
     transition: none;
   }
 
+  #site-root.reveal-enabled .booking-notes-reveal > li {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
   .hero h1 {
     position: absolute;
     animation: none;
@@ -1158,6 +1186,82 @@ body.gallery-lightbox-open {
   margin-top: 0;
 }
 
+.christmas-countdown {
+  width: min(100%, 24rem);
+  margin: var(--space-md) auto var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid color-mix(in srgb, var(--color-christmas-green) 22%, var(--color-border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-yellow) 30%, #fff);
+  text-align: center;
+}
+
+.christmas-countdown-label,
+.christmas-countdown-note,
+.christmas-countdown-expired {
+  margin: 0;
+}
+
+.christmas-countdown-label {
+  color: var(--color-christmas-green);
+  font-size: var(--text-small);
+  letter-spacing: 0.08em;
+}
+
+.christmas-countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-xs);
+  margin-block: var(--space-sm);
+}
+
+.christmas-countdown-unit {
+  display: grid;
+  min-width: 0;
+  padding: 0.38rem 0.2rem 0.3rem;
+  border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+  border-radius: 7px;
+  background: rgb(255 255 255 / 72%);
+  justify-items: center;
+}
+
+.christmas-countdown-unit strong {
+  min-width: 2ch;
+  color: var(--color-christmas-green);
+  font-family: var(--font-number);
+  font-size: clamp(1.15rem, 5vw, 1.45rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--number-weight);
+  line-height: 1;
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+.christmas-countdown-unit strong.is-changing {
+  opacity: 0.55;
+  transform: translateY(-2px);
+}
+
+.christmas-countdown-unit small {
+  margin-top: 0.25rem;
+  color: var(--color-muted);
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.christmas-countdown-note,
+.christmas-countdown-expired {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.christmas-countdown-expired {
+  margin-block: var(--space-sm);
+  color: var(--color-christmas-green);
+  font-size: var(--text-card-title);
+  font-weight: 500;
+}
+
 [data-edit-path="photographyTypes.items.0.details.1"] {
   text-align: left;
 }
@@ -1175,7 +1279,7 @@ body.gallery-lightbox-open {
   scroll-padding-inline: var(--carousel-edge);
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  touch-action: pan-x pan-y;
+  touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -1332,16 +1436,35 @@ body.gallery-lightbox-open {
   z-index: 2;
 }
 
+.plan-card-visual {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
 .limited-plan-group .plan-selector {
-  height: auto;
   transform: none;
+}
+
+.limited-plan-group .plan-card-visual {
+  gap: calc(var(--space-xs) * 0.5);
+}
+
+.limited-plan-group .plan-features {
+  margin-top: 0;
+  padding-top: var(--space-sm);
 }
 
 .limited-plan-group .plan-name {
   color: var(--color-christmas-green);
 }
 
-.plan-selector[data-plan="guinea"].is-christmas-attention {
+.plan-selector[data-plan="guinea"].is-christmas-attention .plan-card-visual {
   animation: christmas-card-attention 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -1588,11 +1711,41 @@ body.gallery-lightbox-open {
 #productCounters .counter-row {
   width: auto;
   max-width: 100%;
-  grid-template-columns: minmax(0, 10rem) auto;
+  grid-template-columns: minmax(0, 11rem) auto;
   gap: var(--space-sm);
   justify-content: center;
   justify-items: start;
   text-align: left;
+}
+
+.addon-product-info {
+  display: grid;
+  grid-template-columns: clamp(3.25rem, 14vw, 3.75rem) minmax(0, 1fr);
+  gap: var(--space-xs);
+  align-items: center;
+  min-width: 0;
+}
+
+.addon-product-image-button {
+  width: clamp(3.25rem, 14vw, 3.75rem);
+  height: clamp(3.25rem, 14vw, 3.75rem);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-soft);
+  cursor: zoom-in;
+}
+
+.addon-product-image-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.addon-product-copy {
+  min-width: 0;
 }
 
 #productCounters .counter-control {
@@ -2775,11 +2928,15 @@ body.gallery-lightbox-open {
 @media (prefers-reduced-motion: reduce) {
   .jump-nav .primary,
   .jump-nav .primary::after,
-  .plan-selector[data-plan="guinea"].is-christmas-attention {
+  .plan-selector[data-plan="guinea"].is-christmas-attention .plan-card-visual {
     animation: none;
   }
 
   .return-directory {
+    transition: none;
+  }
+
+  .christmas-countdown-unit strong {
     transition: none;
   }
 }

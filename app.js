@@ -1,6 +1,6 @@
-import { initCalculator } from "./modules/calculator.js?v=hero-carousel-flow-1";
+import { initCalculator } from "./modules/calculator.js?v=addon-preview-1";
 import { initBookingForm } from "./modules/booking-form.js?v=ui-finish-1";
-import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finish-1";
+import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-manager-3";
 
 (() => {
   const contentUrl = document.body.dataset.contentUrl || "./content/site-content.json";
@@ -24,10 +24,34 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
   };
 
   const safeImageUrl = (value = "") => {
+    if (document.body.dataset.editor === "true" && (/^blob:/.test(value) || /^data:image\//.test(value))) return escapeHtml(value);
     if (/^\.\/assets\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$/.test(value)) {
       return escapeHtml(document.body.dataset.editor === "true" ? `.${value}` : value);
     }
     return safeUrl(value);
+  };
+
+  const galleryItems = (section) => section.gallery?.items || [...(section.gallery?.row1 || []), ...(section.gallery?.row2 || [])];
+  const renderPhilosophyGallery = (items = []) => {
+    if (!items.length) return "";
+    const midpoint = Math.ceil(items.length / 2);
+    const rows = [items.slice(0, midpoint), items.slice(midpoint)];
+    return `<div class="philosophy-gallery" aria-label="作品照片預覽">
+      ${rows.filter((images) => images.length).map((images, rowIndex) => `<div class="philosophy-gallery-row" data-gallery-row="${rowIndex}" data-direction="${rowIndex ? "1" : "-1"}">
+        <div class="philosophy-gallery-track">
+          ${[false, true].map((duplicate) => `<div class="philosophy-gallery-group"${duplicate ? ' aria-hidden="true"' : ""}>${images.map((image, imageIndex) => {
+            const galleryIndex = (rowIndex ? midpoint : 0) + imageIndex;
+            return `<button class="philosophy-polaroid" type="button" data-gallery-index="${galleryIndex}" data-gallery-src="${escapeHtml(image.src)}" data-gallery-width="${Number(image.width) || ""}" data-gallery-height="${Number(image.height) || ""}"${duplicate ? ' tabindex="-1" aria-hidden="true"' : ` aria-label="放大查看${escapeHtml(image.alt || `作品照片 ${galleryIndex + 1}`)}"`}><img src="${safeImageUrl(image.src)}" alt="${duplicate ? "" : escapeHtml(image.alt || `作品照片 ${galleryIndex + 1}`)}" ${galleryIndex < 3 ? "" : 'loading="lazy" '}decoding="async" draggable="false"></button>`;
+          }).join("")}</div>`).join("")}
+        </div>
+      </div>`).join("")}
+    </div>
+    <div class="philosophy-lightbox" role="dialog" aria-modal="true" aria-label="作品照片預覽" hidden>
+      <button class="philosophy-lightbox-close" type="button" aria-label="關閉照片預覽">×</button>
+      <button class="philosophy-lightbox-nav philosophy-lightbox-prev" type="button" aria-label="上一張照片">‹</button>
+      <div class="philosophy-lightbox-frame"><img alt="" draggable="false"></div>
+      <button class="philosophy-lightbox-nav philosophy-lightbox-next" type="button" aria-label="下一張照片">›</button>
+    </div>`;
   };
 
   const renderLines = (lines, path, className = "copy-lines") => `
@@ -103,19 +127,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
           <p${editAttr("philosophy.lines.0")}>${escapeHtml(section.lines[0])}</p>
           <p${editAttr("philosophy.lines.1")}>${escapeHtml(section.lines[1])}</p>
         </div>
-        <div class="philosophy-gallery" aria-label="作品照片預覽">
-          ${[section.gallery.row1, section.gallery.row2].map((images, rowIndex) => `<div class="philosophy-gallery-row" data-gallery-row="${rowIndex}" data-direction="${rowIndex ? "1" : "-1"}">
-            <div class="philosophy-gallery-track">
-              ${[false, true].map((duplicate) => `<div class="philosophy-gallery-group"${duplicate ? ' aria-hidden="true"' : ""}>${images.map((image, imageIndex) => `<button class="philosophy-polaroid" type="button" data-gallery-index="${rowIndex * 10 + imageIndex}"${duplicate ? ' tabindex="-1" aria-hidden="true"' : ` aria-label="放大查看${escapeHtml(image.alt)}"`}><img src="${safeImageUrl(image.src)}" alt="${duplicate ? "" : escapeHtml(image.alt)}" ${imageIndex < 3 ? "" : 'loading="lazy" '}decoding="async" draggable="false"></button>`).join("")}</div>`).join("")}
-            </div>
-          </div>`).join("")}
-        </div>
-        <div class="philosophy-lightbox" role="dialog" aria-modal="true" aria-label="作品照片預覽" hidden>
-          <button class="philosophy-lightbox-close" type="button" aria-label="關閉照片預覽">×</button>
-          <button class="philosophy-lightbox-nav philosophy-lightbox-prev" type="button" aria-label="上一張照片">‹</button>
-          <div class="philosophy-lightbox-frame"><img alt="" draggable="false"></div>
-          <button class="philosophy-lightbox-nav philosophy-lightbox-next" type="button" aria-label="下一張照片">›</button>
-        </div>
+        <div class="philosophy-gallery-host">${renderPhilosophyGallery(galleryItems(section))}</div>
       </div>
     </section>`;
 
@@ -313,11 +325,14 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     }, { passive: true });
   };
 
+  let galleryCleanup = () => {};
   const initPhilosophyGallery = () => {
     const gallery = root.querySelector(".philosophy-gallery");
     const lightbox = root.querySelector(".philosophy-lightbox");
-    if (!gallery || !lightbox) return;
+    if (!gallery || !lightbox) return () => {};
     document.body.append(lightbox);
+    const controller = new AbortController();
+    const on = (target, type, handler, options = {}) => target.addEventListener(type, handler, { ...options, signal: controller.signal });
 
     const rows = [...gallery.querySelectorAll(".philosophy-gallery-row")].map((row) => ({
       row,
@@ -351,6 +366,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     let lightboxPointerX = null;
     let returnFocus = null;
     let lockedScrollY = 0;
+    const lightboxNav = [...lightbox.querySelectorAll(".philosophy-lightbox-nav")];
 
     const easeOut = (progress) => {
       let parameter = progress;
@@ -399,6 +415,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     const openLightbox = (index, trigger) => {
       lightboxIndex = index;
       returnFocus = trigger;
+      lightboxNav.forEach((button) => { button.hidden = false; });
       lockedScrollY = window.scrollY;
       document.body.style.top = `-${lockedScrollY}px`;
       document.body.classList.add("gallery-lightbox-open");
@@ -406,6 +423,20 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       const image = lightbox.querySelector("img");
       image.src = images[index].currentSrc || images[index].src;
       image.alt = images[index].alt;
+      lightbox.querySelector(".philosophy-lightbox-close").focus();
+    };
+    const openStandaloneImage = (event) => {
+      const { src, alt, trigger } = event.detail || {};
+      if (!src || !/^(?:\.\/assets\/|https?:|blob:|data:image\/)/.test(src)) return;
+      returnFocus = trigger instanceof HTMLElement ? trigger : null;
+      lightboxNav.forEach((button) => { button.hidden = true; });
+      lockedScrollY = window.scrollY;
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.classList.add("gallery-lightbox-open");
+      lightbox.hidden = false;
+      const image = lightbox.querySelector("img");
+      image.src = src;
+      image.alt = alt || "商品圖片預覽";
       lightbox.querySelector(".philosophy-lightbox-close").focus();
     };
     const showLightboxImage = (step) => {
@@ -423,12 +454,15 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       lightbox.hidden = true;
       document.body.classList.remove("gallery-lightbox-open");
       document.body.style.top = "";
-      window.scrollTo(0, lockedScrollY);
-      returnFocus?.focus();
+      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = "auto";
+      window.scrollTo({ top: lockedScrollY, left: 0, behavior: "auto" });
+      document.documentElement.style.scrollBehavior = previousScrollBehavior;
+      returnFocus?.focus({ preventScroll: true });
     };
 
     rows.forEach((state) => {
-      state.row.addEventListener("pointerdown", (event) => {
+      on(state.row, "pointerdown", (event) => {
         state.pointerId = event.pointerId;
         state.startX = event.clientX;
         state.startY = event.clientY;
@@ -442,7 +476,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
         state.moved = false;
         state.pausedUntil = Infinity;
       });
-      state.row.addEventListener("pointermove", (event) => {
+      on(state.row, "pointermove", (event) => {
         if (event.pointerId !== state.pointerId || state.gesture === "vertical") return;
         const deltaX = event.clientX - state.startX;
         const deltaY = event.clientY - state.startY;
@@ -481,9 +515,9 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
         if (state.moved) state.suppressClickUntil = performance.now() + 100;
         window.setTimeout(() => { state.moved = false; }, 0);
       };
-      state.row.addEventListener("pointerup", endDrag);
-      state.row.addEventListener("pointercancel", endDrag);
-      state.row.addEventListener("click", (event) => {
+      on(state.row, "pointerup", endDrag);
+      on(state.row, "pointercancel", endDrag);
+      on(state.row, "click", (event) => {
         const button = event.target.closest(".philosophy-polaroid");
         if (!button || button.closest('[aria-hidden="true"]')) return;
         event.preventDefault();
@@ -492,31 +526,38 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       });
     });
 
-    lightbox.querySelector(".philosophy-lightbox-close").addEventListener("click", closeLightbox);
-    lightbox.querySelector(".philosophy-lightbox-prev").addEventListener("click", () => showLightboxImage(-1));
-    lightbox.querySelector(".philosophy-lightbox-next").addEventListener("click", () => showLightboxImage(1));
-    lightbox.addEventListener("click", (event) => { if (event.target === lightbox) closeLightbox(); });
-    lightbox.addEventListener("pointerdown", (event) => { lightboxPointerX = event.clientX; });
-    lightbox.addEventListener("pointerup", (event) => {
+    on(lightbox.querySelector(".philosophy-lightbox-close"), "click", closeLightbox);
+    on(lightbox.querySelector(".philosophy-lightbox-prev"), "click", () => showLightboxImage(-1));
+    on(lightbox.querySelector(".philosophy-lightbox-next"), "click", () => showLightboxImage(1));
+    on(lightbox, "click", (event) => { if (event.target === lightbox) closeLightbox(); });
+    on(lightbox, "pointerdown", (event) => { lightboxPointerX = event.clientX; });
+    on(lightbox, "pointerup", (event) => {
       if (lightboxPointerX === null) return;
       const delta = event.clientX - lightboxPointerX;
-      if (Math.abs(delta) > 45) showLightboxImage(delta < 0 ? 1 : -1);
+      if (!lightboxNav[0].hidden && Math.abs(delta) > 45) showLightboxImage(delta < 0 ? 1 : -1);
       lightboxPointerX = null;
     });
-    document.addEventListener("keydown", (event) => {
+    on(window, "mokomoko:open-image", openStandaloneImage);
+    on(document, "keydown", (event) => {
       if (lightbox.hidden) return;
       if (event.key === "Escape") closeLightbox();
-      if (event.key === "ArrowLeft") showLightboxImage(-1);
-      if (event.key === "ArrowRight") showLightboxImage(1);
+      if (!lightboxNav[0].hidden && event.key === "ArrowLeft") showLightboxImage(-1);
+      if (!lightboxNav[0].hidden && event.key === "ArrowRight") showLightboxImage(1);
     });
-    window.addEventListener("resize", measure, { passive: true });
+    on(window, "resize", measure, { passive: true });
     requestAnimationFrame(() => {
       measure();
       rows[1].offset = rows[1].loopWidth * 0.5;
       renderRows();
       frameId = requestAnimationFrame(animate);
     });
-    window.addEventListener("pagehide", () => cancelAnimationFrame(frameId), { once: true });
+    on(window, "pagehide", () => cancelAnimationFrame(frameId), { once: true });
+    return () => {
+      controller.abort();
+      cancelAnimationFrame(frameId);
+      if (!lightbox.hidden) closeLightbox();
+      lightbox.remove();
+    };
   };
 
   const initScrollReveal = () => {
@@ -530,8 +571,12 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
       ".closing .content",
     ].join(","))];
 
-    const targets = [...revealSections, ...fadeTargets];
-    targets.forEach((target) => target.classList.add("reveal-item"));
+    const bookingNotes = root.querySelector(".booking-notes");
+    const targets = [...revealSections, ...fadeTargets, ...(bookingNotes ? [bookingNotes] : [])];
+    targets.forEach((target) => target.classList.add(target === bookingNotes ? "booking-notes-reveal" : "reveal-item"));
+    bookingNotes?.querySelectorAll(":scope > li").forEach((item, index) => {
+      item.style.setProperty("--booking-reveal-index", index);
+    });
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
@@ -556,7 +601,14 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=ui-finis
     initBookingForm(document.getElementById(content.integrations.bookingForm.mountId), content);
     initHeroParallax();
     initHeroMouseParallax();
-    initPhilosophyGallery();
+    galleryCleanup = initPhilosophyGallery();
+    window.__MOKOMOKO_GALLERY_UPDATE__ = (items) => {
+      galleryCleanup();
+      const host = root.querySelector(".philosophy-gallery-host");
+      if (!host) return;
+      host.innerHTML = renderPhilosophyGallery(items);
+      galleryCleanup = initPhilosophyGallery();
+    };
     initScrollReveal();
     initEditor();
   };
