@@ -7,10 +7,18 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>"]/g, (character) 
   '"': "&quot;",
 })[character]);
 
+const safeImageUrl = (value = "") => /^\.\/assets\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$/.test(value)
+  ? escapeHtml(value)
+  : "";
+
 const editable = (path) => `data-edit-path="${escapeHtml(path)}"`;
+let christmasCountdownTimer = 0;
 
 export function initCalculator(root, content) {
   if (!root || !content.integrations.calculator.enabled) return;
+
+  window.clearInterval(christmasCountdownTimer);
+  christmasCountdownTimer = 0;
 
   const engine = createPricingEngine(content);
   const plans = Object.values(engine.plans).sort((a, b) => a.sortOrder - b.sortOrder);
@@ -33,6 +41,14 @@ export function initCalculator(root, content) {
         <div class="plan-group limited-plan-group">
           <p class="plan-group-title" ${editable("calculator.limitedHeading")}>${escapeHtml(content.calculator.limitedHeading)}</p>
           <div class="plan-group-meta">${content.calculator.limitedDates.map((line, index) => `<p ${editable(`calculator.limitedDates.${index}`)}>${escapeHtml(line)}</p>`).join("")}</div>
+          ${content.calculator.christmasCountdown ? `<div class="christmas-countdown" data-deadline="${escapeHtml(content.calculator.christmasCountdown.deadline)}" data-closed-note="${escapeHtml(content.calculator.christmasCountdown.closedNote)}" aria-label="${escapeHtml(content.calculator.christmasCountdown.label)}">
+            <p class="christmas-countdown-label">${escapeHtml(content.calculator.christmasCountdown.label)}</p>
+            <div class="christmas-countdown-grid" aria-hidden="true">
+              ${[["days", "天"], ["hours", "時"], ["minutes", "分"], ["seconds", "秒"]].map(([unit, label]) => `<span class="christmas-countdown-unit"><strong data-countdown-unit="${unit}">00</strong><small>${label}</small></span>`).join("")}
+            </div>
+            <p class="christmas-countdown-expired" hidden>預約已截止</p>
+            <p class="christmas-countdown-note">${escapeHtml(content.calculator.christmasCountdown.note)}</p>
+          </div>` : ""}
           <div id="limitedPlans" class="plan-card-track" role="radiogroup" aria-label="期間限定拍攝方案"></div>
           <div class="plan-pagination" data-pagination-for="limitedPlans" aria-label="期間限定方案分頁"></div>
         </div>
@@ -109,20 +125,67 @@ export function initCalculator(root, content) {
         <svg class="decor-holly" viewBox="0 0 32 32"><path d="M15 18C7 17 4 11 6 5c6 1 10 5 10 12M17 18c8-1 11-7 9-13-6 1-10 5-10 12"/><circle cx="13" cy="20" r="3"/><circle cx="19" cy="20" r="3"/><circle cx="16" cy="24" r="3"/></svg>
         <svg class="decor-ribbon" viewBox="0 0 32 32"><path d="M16 15C8 7 3 10 6 15c2 3 7 2 10 0Zm0 0c8-8 13-5 10 0-2 3-7 2-10 0Zm0 0-6 13 6-4 6 4z"/></svg>
       </span>` : ""}
-      <span class="plan-pet-slot${hasImage ? "" : " is-empty"}"${hasImage ? "" : ' aria-hidden="true"'}>${hasImage ? `<img class="plan-pet-image" src="${escapeHtml(plan.image.path)}" alt="${escapeHtml(plan.image.alt || "")}">` : ""}</span>
-      <span class="plan-card-top">
-        ${plan.badge ? `<span class="plan-badge" ${editable(`${path}.badge`)}>${escapeHtml(plan.badge)}</span>` : ""}
-        <span class="plan-name" ${editable(`${path}.name`)}>${escapeHtml(plan.name)}</span>
+      <span class="plan-card-visual">
+        <span class="plan-pet-slot${hasImage ? "" : " is-empty"}"${hasImage ? "" : ' aria-hidden="true"'}>${hasImage ? `<img class="plan-pet-image" src="${escapeHtml(plan.image.path)}" alt="${escapeHtml(plan.image.alt || "")}">` : ""}</span>
+        <span class="plan-card-top">
+          ${plan.badge ? `<span class="plan-badge" ${editable(`${path}.badge`)}>${escapeHtml(plan.badge)}</span>` : ""}
+          <span class="plan-name" ${editable(`${path}.name`)}>${escapeHtml(plan.name)}</span>
+        </span>
+        <span class="plan-price">${engine.formatMoney(plan.price)}</span>
+        ${plan.group === "limited" ? `<span class="plan-studio-included">${escapeHtml(limitedStudioLabel())}</span>` : ""}
+        <span class="plan-features">${features.map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>
+        <span class="plan-estimate-button" aria-hidden="true">選擇並估價</span>
       </span>
-      <span class="plan-price">${engine.formatMoney(plan.price)}</span>
-      ${plan.group === "limited" ? `<span class="plan-studio-included">${escapeHtml(limitedStudioLabel())}</span>` : ""}
-      <span class="plan-features">${features.map((item, index) => `<span><i aria-hidden="true">✓</i> <span ${editable(`${path}.${featureKey}.${index}`)}>${escapeHtml(item.replace(/^[①②③④⑤]\s*/, ""))}</span></span>`).join("")}</span>
-      <span class="plan-estimate-button" aria-hidden="true">選擇並估價</span>
     </button>`;
   };
 
   root.querySelector("#regularPlans").innerHTML = plans.filter((plan) => plan.group === "regular").map(planCard).join("");
   root.querySelector("#limitedPlans").innerHTML = plans.filter((plan) => plan.group === "limited").map(planCard).join("");
+
+  const countdown = root.querySelector(".christmas-countdown");
+  if (countdown) {
+    const deadline = Date.parse(countdown.dataset.deadline);
+    const units = Object.fromEntries([...countdown.querySelectorAll("[data-countdown-unit]")].map((node) => [node.dataset.countdownUnit, node]));
+    const grid = countdown.querySelector(".christmas-countdown-grid");
+    const expired = countdown.querySelector(".christmas-countdown-expired");
+    const note = countdown.querySelector(".christmas-countdown-note");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const updateCountdown = () => {
+      const remaining = Math.max(0, deadline - Date.now());
+      if (!Number.isFinite(deadline) || remaining === 0) {
+        grid.hidden = true;
+        expired.hidden = false;
+        note.textContent = countdown.dataset.closedNote;
+        window.clearInterval(christmasCountdownTimer);
+        christmasCountdownTimer = 0;
+        return;
+      }
+
+      const totalSeconds = Math.floor(remaining / 1000);
+      const values = {
+        days: Math.floor(totalSeconds / 86400),
+        hours: Math.floor((totalSeconds % 86400) / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
+      };
+
+      Object.entries(values).forEach(([unit, value]) => {
+        const nextValue = String(value).padStart(2, "0");
+        if (units[unit].textContent === nextValue) return;
+        units[unit].textContent = nextValue;
+        if (reducedMotion.matches) return;
+        units[unit].classList.add("is-changing");
+        requestAnimationFrame(() => units[unit].classList.remove("is-changing"));
+      });
+    };
+
+    updateCountdown();
+    if (christmasCountdownTimer === 0 && Number.isFinite(deadline) && deadline > Date.now()) {
+      christmasCountdownTimer = window.setInterval(updateCountdown, 1000);
+    }
+  }
+
   root.querySelectorAll(".plan-card-track").forEach((track) => {
     track.classList.toggle("has-plan-pets", Boolean(track.querySelector(".plan-pet-image")));
   });
@@ -165,6 +228,58 @@ export function initCalculator(root, content) {
     root.querySelectorAll(".plan-card-track").forEach((track) => {
       const cards = [...track.querySelectorAll("[data-plan]")];
       const pagination = root.querySelector(`[data-pagination-for="${track.id}"]`);
+      let drag = null;
+      let suppressClickUntil = 0;
+
+      const finishDrag = (event) => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        const wasHorizontal = drag.axis === "x";
+        if (track.hasPointerCapture?.(event.pointerId)) track.releasePointerCapture(event.pointerId);
+        drag = null;
+        if (!wasHorizontal) return;
+        suppressClickUntil = performance.now() + 350;
+        const trackRect = track.getBoundingClientRect();
+        const center = trackRect.left + (trackRect.width / 2);
+        const nearest = cards.reduce((closest, card) => {
+          const rect = card.getBoundingClientRect();
+          const distance = Math.abs((rect.left + (rect.width / 2)) - center);
+          return distance < closest.distance ? { card, distance } : closest;
+        }, { card: null, distance: Infinity }).card;
+        centerPlanCard(nearest, "smooth");
+      };
+
+      track.addEventListener("pointerdown", (event) => {
+        if (!window.matchMedia("(max-width: 767px)").matches) return;
+        drag = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startScrollLeft: track.scrollLeft,
+          axis: null,
+        };
+      }, { passive: true });
+
+      track.addEventListener("pointermove", (event) => {
+        if (!drag || event.pointerId !== drag.pointerId || drag.axis === "y") return;
+        const deltaX = event.clientX - drag.startX;
+        const deltaY = event.clientY - drag.startY;
+        if (!drag.axis) {
+          if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 8) return;
+          drag.axis = Math.abs(deltaX) > Math.abs(deltaY) ? "x" : "y";
+          if (drag.axis === "y") return;
+          track.setPointerCapture?.(event.pointerId);
+        }
+        event.preventDefault();
+        track.scrollLeft = drag.startScrollLeft - deltaX;
+      });
+
+      track.addEventListener("pointerup", finishDrag);
+      track.addEventListener("pointercancel", finishDrag);
+      track.addEventListener("click", (event) => {
+        if (performance.now() >= suppressClickUntil) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
       pagination.innerHTML = cards.map((card, index) => `<button type="button" aria-label="查看第 ${index + 1} 個方案" data-carousel-index="${index}"></button>`).join("");
       pagination.addEventListener("click", (event) => {
         const dot = event.target.closest("[data-carousel-index]");
@@ -269,8 +384,13 @@ export function initCalculator(root, content) {
   const renderProducts = () => {
     root.querySelector("#productCounters").innerHTML = engine.bookingAddons.map((addon) => {
       const quantity = state.products[addon.id];
+      const image = safeImageUrl(addon.image);
+      const imageAlt = addon.imageAlt || `${addon.calculatorName || addon.name}商品預覽`;
       return `<div class="counter-row">
-        <div><strong>${escapeHtml(addon.calculatorName || addon.name)}</strong><p>每份 ${engine.formatMoney(addon.price)}，0 表示不加購</p></div>
+        <div class="addon-product-info">
+          ${image ? `<button type="button" class="addon-product-image-button" data-addon-image="${image}" data-addon-image-alt="${escapeHtml(imageAlt)}" aria-label="放大查看${escapeHtml(imageAlt)}"><img src="${image}" alt="${escapeHtml(imageAlt)}" loading="lazy" decoding="async"></button>` : ""}
+          <div class="addon-product-copy"><strong>${escapeHtml(addon.calculatorName || addon.name)}</strong><p>每份 ${engine.formatMoney(addon.price)}，0 表示不加購</p></div>
+        </div>
         <div class="counter-control"><button type="button" data-product="${addon.id}" data-product-delta="-1" aria-label="減少${escapeHtml(addon.name)}" ${quantity <= 0 ? "disabled" : ""}>−</button><span aria-live="polite">${quantity}</span><button type="button" data-product="${addon.id}" data-product-delta="1" aria-label="增加${escapeHtml(addon.name)}">＋</button></div>
       </div>`;
     }).join("");
@@ -320,6 +440,19 @@ export function initCalculator(root, content) {
   };
 
   root.addEventListener("click", (event) => {
+    const imageButton = event.target.closest("[data-addon-image]");
+    if (imageButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      window.dispatchEvent(new CustomEvent("mokomoko:open-image", {
+        detail: {
+          src: imageButton.dataset.addonImage,
+          alt: imageButton.dataset.addonImageAlt,
+          trigger: imageButton,
+        },
+      }));
+      return;
+    }
     const planButton = event.target.closest("[data-plan]");
     if (planButton) {
       selectPlan(planButton.dataset.plan);
