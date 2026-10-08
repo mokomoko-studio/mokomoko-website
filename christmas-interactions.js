@@ -20,7 +20,7 @@
     if (preparedLightboxes.has(lightbox)) return;
     preparedLightboxes.add(lightbox);
     new MutationObserver(() => {
-      if (lightbox.hidden) requestAnimationFrame(restoreGalleryPosition);
+      if (lightbox.hidden && lightbox.dataset.lightboxSource === "philosophy") requestAnimationFrame(restoreGalleryPosition);
     }).observe(lightbox, { attributes: true, attributeFilter: ["hidden"] });
   };
 

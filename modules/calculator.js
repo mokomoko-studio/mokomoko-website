@@ -7,9 +7,14 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>"]/g, (character) 
   '"': "&quot;",
 })[character]);
 
-const safeImageUrl = (value = "") => /^\.\/assets\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$/.test(value)
-  ? escapeHtml(value)
-  : "";
+const safeImageUrl = (value = "", allowDraft = false) => {
+  if ((document.body.dataset.editor === "true" || allowDraft) && /^(?:blob:|data:image\/)/.test(value)) return escapeHtml(value);
+  if (/^\.\/assets\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$/.test(value)) {
+    const resolved = document.body.dataset.editor === "true" && document.body.dataset.editorQuery !== "true" ? `.${value}` : value;
+    return escapeHtml(resolved);
+  }
+  return "";
+};
 
 const editable = (path) => `data-edit-path="${escapeHtml(path)}"`;
 let christmasCountdownTimer = 0;
@@ -30,6 +35,7 @@ export function initCalculator(root, content) {
     products: Object.fromEntries(engine.bookingAddons.map((addon) => [addon.id, 0])),
   };
   let carouselInteracted = false;
+  const addonImageChannel = "BroadcastChannel" in window ? new BroadcastChannel("mokomoko-addon-image-preview-v1") : null;
 
   root.innerHTML = `
     <div class="pricing-flow">
@@ -49,7 +55,9 @@ export function initCalculator(root, content) {
             <p class="christmas-countdown-expired" hidden>預約已截止</p>
             <p class="christmas-countdown-note">${escapeHtml(content.calculator.christmasCountdown.note)}</p>
           </div>` : ""}
-          <div id="limitedPlans" class="plan-card-track" role="radiogroup" aria-label="期間限定拍攝方案"></div>
+          <div class="limited-plan-viewport">
+            <div id="limitedPlans" class="plan-card-track" role="radiogroup" aria-label="期間限定拍攝方案"></div>
+          </div>
           <div class="plan-pagination" data-pagination-for="limitedPlans" aria-label="期間限定方案分頁"></div>
         </div>
         <div class="plan-group">
@@ -195,18 +203,20 @@ export function initCalculator(root, content) {
   const centerPlanCard = (card, behavior = "smooth") => {
     const track = card?.closest(".plan-card-track");
     if (!card || !track) return;
+    const viewport = track.closest(".limited-plan-viewport") || track;
     const cardRect = card.getBoundingClientRect();
-    const trackRect = track.getBoundingClientRect();
-    const target = track.scrollLeft + (cardRect.left + (cardRect.width / 2)) - (trackRect.left + (trackRect.width / 2));
-    track.scrollTo({ left: target, behavior });
+    const viewportRect = viewport.getBoundingClientRect();
+    const target = viewport.scrollLeft + (cardRect.left + (cardRect.width / 2)) - (viewportRect.left + (viewportRect.width / 2));
+    viewport.scrollTo({ left: target, behavior });
   };
 
   const updatePagination = (track) => {
     const cards = [...track.querySelectorAll("[data-plan]")];
     const pagination = root.querySelector(`[data-pagination-for="${track.id}"]`);
     if (!cards.length || !pagination) return;
-    const trackRect = track.getBoundingClientRect();
-    const center = trackRect.left + (trackRect.width / 2);
+    const viewport = track.closest(".limited-plan-viewport") || track;
+    const viewportRect = viewport.getBoundingClientRect();
+    const center = viewportRect.left + (viewportRect.width / 2);
     let activeIndex = 0;
     let nearest = Infinity;
     cards.forEach((card, index) => {
@@ -228,8 +238,48 @@ export function initCalculator(root, content) {
     root.querySelectorAll(".plan-card-track").forEach((track) => {
       const cards = [...track.querySelectorAll("[data-plan]")];
       const pagination = root.querySelector(`[data-pagination-for="${track.id}"]`);
+      const viewport = track.closest(".limited-plan-viewport") || track;
+      const usesNativeScroll = track.id === "limitedPlans";
       let drag = null;
       let suppressClickUntil = 0;
+
+      pagination.innerHTML = cards.map((card, index) => `<button type="button" aria-label="查看第 ${index + 1} 個方案" data-carousel-index="${index}"></button>`).join("");
+      pagination.addEventListener("click", (event) => {
+        const dot = event.target.closest("[data-carousel-index]");
+        if (!dot) return;
+        centerPlanCard(cards[Number(dot.dataset.carouselIndex)]);
+      });
+      let frame = 0;
+      viewport.addEventListener("scroll", () => {
+        if (frame) cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          updatePagination(track);
+        });
+      }, { passive: true });
+      updatePagination(track);
+
+      if (usesNativeScroll) {
+        let nativeGesture = null;
+        let suppressNativeClickUntil = 0;
+        track.addEventListener("pointerdown", (event) => {
+          nativeGesture = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY };
+        }, { passive: true });
+        track.addEventListener("pointerup", (event) => {
+          if (!nativeGesture || event.pointerId !== nativeGesture.pointerId) return;
+          const deltaX = event.clientX - nativeGesture.startX;
+          const deltaY = event.clientY - nativeGesture.startY;
+          nativeGesture = null;
+          if (Math.abs(deltaX) > 8 && Math.abs(deltaX) > Math.abs(deltaY)) suppressNativeClickUntil = performance.now() + 350;
+        }, { passive: true });
+        track.addEventListener("pointercancel", () => { nativeGesture = null; }, { passive: true });
+        track.addEventListener("click", (event) => {
+          if (performance.now() >= suppressNativeClickUntil) return;
+          event.preventDefault();
+          event.stopPropagation();
+        }, true);
+        return;
+      }
 
       const finishDrag = (event) => {
         if (!drag || event.pointerId !== drag.pointerId) return;
@@ -280,21 +330,6 @@ export function initCalculator(root, content) {
         event.preventDefault();
         event.stopPropagation();
       }, true);
-      pagination.innerHTML = cards.map((card, index) => `<button type="button" aria-label="查看第 ${index + 1} 個方案" data-carousel-index="${index}"></button>`).join("");
-      pagination.addEventListener("click", (event) => {
-        const dot = event.target.closest("[data-carousel-index]");
-        if (!dot) return;
-        centerPlanCard(cards[Number(dot.dataset.carouselIndex)]);
-      });
-      let frame = 0;
-      track.addEventListener("scroll", () => {
-        if (frame) cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => {
-          frame = 0;
-          updatePagination(track);
-        });
-      }, { passive: true });
-      updatePagination(track);
     });
   };
 
@@ -354,6 +389,11 @@ export function initCalculator(root, content) {
     render();
   };
 
+  const addonImages = (addon) => {
+    const values = Array.isArray(addon?.images) && addon.images.length ? addon.images : [addon?.image];
+    return [...new Set(values.map((image) => typeof image === "string" ? image : image?.src).map((image) => safeImageUrl(image, addon?.id === "strip")).filter(Boolean))];
+  };
+
   const renderConditions = () => {
     const info = engine.species[state.species];
     root.querySelector("#animalCounters").innerHTML = `<div class="counter-row">
@@ -384,13 +424,13 @@ export function initCalculator(root, content) {
   const renderProducts = () => {
     root.querySelector("#productCounters").innerHTML = engine.bookingAddons.map((addon) => {
       const quantity = state.products[addon.id];
-      const image = safeImageUrl(addon.image);
-      const imageAlt = addon.imageAlt || `${addon.calculatorName || addon.name}商品預覽`;
+      const media = content.addons.items.find((item) => item.id === addon.id) || addon;
+      const images = addonImages(media);
+      const image = images[0] || safeImageUrl(media.image);
+      const imageAlt = media.imageAlt || `${addon.calculatorName || addon.name}商品預覽`;
       return `<div class="counter-row">
-        <div class="addon-product-info">
-          ${image ? `<button type="button" class="addon-product-image-button" data-addon-image="${image}" data-addon-image-alt="${escapeHtml(imageAlt)}" aria-label="放大查看${escapeHtml(imageAlt)}"><img src="${image}" alt="${escapeHtml(imageAlt)}" loading="lazy" decoding="async"></button>` : ""}
-          <div class="addon-product-copy"><strong>${escapeHtml(addon.calculatorName || addon.name)}</strong><p>每份 ${engine.formatMoney(addon.price)}，0 表示不加購</p></div>
-        </div>
+        ${image ? `<button type="button" class="addon-product-image-button" data-addon-id="${escapeHtml(addon.id)}" aria-label="放大查看${escapeHtml(imageAlt)}"><img src="${image}" alt="${escapeHtml(imageAlt)}" loading="lazy" decoding="async"></button>` : '<span class="addon-product-image-spacer" aria-hidden="true"></span>'}
+        <div class="addon-product-copy"><strong>${escapeHtml(addon.calculatorName || addon.name)}</strong><p>每份 ${engine.formatMoney(addon.price)}，0 表示不加購</p></div>
         <div class="counter-control"><button type="button" data-product="${addon.id}" data-product-delta="-1" aria-label="減少${escapeHtml(addon.name)}" ${quantity <= 0 ? "disabled" : ""}>−</button><span aria-live="polite">${quantity}</span><button type="button" data-product="${addon.id}" data-product-delta="1" aria-label="增加${escapeHtml(addon.name)}">＋</button></div>
       </div>`;
     }).join("");
@@ -440,14 +480,18 @@ export function initCalculator(root, content) {
   };
 
   root.addEventListener("click", (event) => {
-    const imageButton = event.target.closest("[data-addon-image]");
+    const imageButton = event.target.closest("[data-addon-id]");
     if (imageButton) {
       event.preventDefault();
       event.stopPropagation();
+      const addon = content.addons.items.find((item) => item.id === imageButton.dataset.addonId);
+      const images = addonImages(addon);
+      if (!images.length) return;
       window.dispatchEvent(new CustomEvent("mokomoko:open-image", {
         detail: {
-          src: imageButton.dataset.addonImage,
-          alt: imageButton.dataset.addonImageAlt,
+          src: images[0],
+          images,
+          alt: addon?.imageAlt || `${addon?.calculatorName || addon?.name || "商品"}商品預覽`,
           trigger: imageButton,
         },
       }));
@@ -491,6 +535,20 @@ export function initCalculator(root, content) {
     cursor[parts.at(-1)] = value;
     if (state.plan) renderSummary();
   });
+
+  const applyAddonImages = ({ id, images } = {}) => {
+    const addon = content.addons.items.find((item) => item.id === id);
+    if (!addon || !Array.isArray(images)) return;
+    addon.images = images.filter((image) => typeof image === "string");
+    addon.image = addon.images[0] || "";
+    if (state.species) renderProducts();
+  };
+
+  document.addEventListener("mokomoko:addon-images-change", (event) => applyAddonImages(event.detail));
+  if (addonImageChannel) addonImageChannel.onmessage = (event) => {
+    if (event.data?.id === "strip") applyAddonImages(event.data);
+  };
+  window.addEventListener("pagehide", () => addonImageChannel?.close(), { once: true });
 
   render();
   setupPlanCarousels();

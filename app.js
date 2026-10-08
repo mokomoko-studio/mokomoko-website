@@ -1,10 +1,32 @@
-import { initCalculator } from "./modules/calculator.js?v=addon-preview-1";
+import { initCalculator } from "./modules/calculator.js?v=mobile-swipe-1";
 import { initBookingForm } from "./modules/booking-form.js?v=ui-finish-1";
-import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-manager-3";
+import { initEditor, prepareEditorContent } from "./modules/editor.js?v=addon-image-draft-v2";
 
 (() => {
   const contentUrl = document.body.dataset.contentUrl || "./content/site-content.json";
   const root = document.querySelector("#site-root");
+
+  if (new URLSearchParams(window.location.search).get("edit") === "1" && document.body.dataset.editor !== "true") {
+    document.body.dataset.editor = "true";
+    document.body.dataset.editorQuery = "true";
+    document.body.classList.add("editor-page");
+    const editorStyles = document.createElement("link");
+    editorStyles.rel = "stylesheet";
+    editorStyles.href = "./edit/editor.css";
+    document.head.append(editorStyles);
+    const shell = document.createElement("div");
+    shell.className = "editor-shell";
+    const preview = document.createElement("div");
+    preview.className = "editor-preview";
+    preview.setAttribute("aria-label", "網站預覽");
+    const inspector = document.createElement("aside");
+    inspector.id = "editor-inspector";
+    inspector.className = "editor-inspector";
+    inspector.setAttribute("aria-label", "編輯設定");
+    root.replaceWith(shell);
+    preview.append(root);
+    shell.append(preview, inspector);
+  }
 
   const escapeHtml = (value = "") => String(value).replace(/[&<>"]/g, (character) => ({
     "&": "&amp;",
@@ -49,7 +71,10 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-
     <div class="philosophy-lightbox" role="dialog" aria-modal="true" aria-label="作品照片預覽" hidden>
       <button class="philosophy-lightbox-close" type="button" aria-label="關閉照片預覽">×</button>
       <button class="philosophy-lightbox-nav philosophy-lightbox-prev" type="button" aria-label="上一張照片">‹</button>
-      <div class="philosophy-lightbox-frame"><img alt="" draggable="false"></div>
+      <div class="philosophy-lightbox-content">
+        <div class="philosophy-lightbox-frame"><img alt="" draggable="false"></div>
+        <div class="product-lightbox-thumbnails" role="list" aria-label="商品圖片列表" hidden></div>
+      </div>
       <button class="philosophy-lightbox-nav philosophy-lightbox-next" type="button" aria-label="下一張照片">›</button>
     </div>`;
   };
@@ -358,7 +383,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-
       autoBlendStart: 0,
     }));
     const originals = [...gallery.querySelectorAll(".philosophy-gallery-group:not([aria-hidden]) .philosophy-polaroid")];
-    const images = originals.map((button) => button.querySelector("img"));
+    const galleryImages = originals.map((button) => button.querySelector("img"));
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let previousTime = performance.now();
     let frameId = 0;
@@ -366,7 +391,41 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-
     let lightboxPointerX = null;
     let returnFocus = null;
     let lockedScrollY = 0;
+    let activeLightboxImages = [];
     const lightboxNav = [...lightbox.querySelectorAll(".philosophy-lightbox-nav")];
+    const thumbnailStrip = lightbox.querySelector(".product-lightbox-thumbnails");
+
+    const lightboxSource = (image, fallbackAlt) => ({
+      src: typeof image === "string" ? image : image?.src,
+      alt: typeof image === "string" ? fallbackAlt : image?.alt || fallbackAlt,
+    });
+
+    const setLightboxImage = (index, animateImage = false) => {
+      if (!activeLightboxImages.length) return;
+      lightboxIndex = (index + activeLightboxImages.length) % activeLightboxImages.length;
+      const source = activeLightboxImages[lightboxIndex];
+      const image = lightbox.querySelector(".philosophy-lightbox-frame img");
+      const apply = () => {
+        image.src = source.src;
+        image.alt = source.alt;
+        thumbnailStrip.querySelectorAll("button").forEach((button, buttonIndex) => {
+          const selected = buttonIndex === lightboxIndex;
+          button.classList.toggle("is-selected", selected);
+          button.setAttribute("aria-current", selected ? "true" : "false");
+        });
+        const selectedThumb = thumbnailStrip.children[lightboxIndex];
+        if (selectedThumb) thumbnailStrip.scrollLeft = Math.max(0, selectedThumb.offsetLeft - (thumbnailStrip.clientWidth - selectedThumb.clientWidth) / 2);
+        requestAnimationFrame(() => image.classList.remove("is-changing"));
+      };
+      if (!animateImage) return apply();
+      image.classList.add("is-changing");
+      window.setTimeout(apply, 80);
+    };
+
+    const renderProductThumbnails = () => {
+      thumbnailStrip.hidden = activeLightboxImages.length < 2;
+      thumbnailStrip.innerHTML = activeLightboxImages.map((image, index) => `<button type="button" role="listitem" data-lightbox-index="${index}" aria-label="查看第 ${index + 1} 張商品圖片"><img src="${escapeHtml(image.src)}" alt=""></button>`).join("");
+    };
 
     const easeOut = (progress) => {
       let parameter = progress;
@@ -413,41 +472,38 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-
     };
 
     const openLightbox = (index, trigger) => {
-      lightboxIndex = index;
+      activeLightboxImages = galleryImages.map((image) => ({ src: image.currentSrc || image.src, alt: image.alt }));
       returnFocus = trigger;
       lightboxNav.forEach((button) => { button.hidden = false; });
+      thumbnailStrip.hidden = true;
+      thumbnailStrip.innerHTML = "";
+      lightbox.dataset.lightboxSource = "philosophy";
       lockedScrollY = window.scrollY;
       document.body.style.top = `-${lockedScrollY}px`;
       document.body.classList.add("gallery-lightbox-open");
       lightbox.hidden = false;
-      const image = lightbox.querySelector("img");
-      image.src = images[index].currentSrc || images[index].src;
-      image.alt = images[index].alt;
+      setLightboxImage(index);
       lightbox.querySelector(".philosophy-lightbox-close").focus();
     };
     const openStandaloneImage = (event) => {
-      const { src, alt, trigger } = event.detail || {};
-      if (!src || !/^(?:\.\/assets\/|https?:|blob:|data:image\/)/.test(src)) return;
+      const { src, images, alt, trigger, index = 0 } = event.detail || {};
+      activeLightboxImages = (Array.isArray(images) && images.length ? images : [src])
+        .map((image) => lightboxSource(image, alt || "商品圖片預覽"))
+        .filter((image) => image.src && /^(?:(?:\.\.?\/)assets\/|https?:|blob:|data:image\/)/.test(image.src));
+      if (!activeLightboxImages.length) return;
       returnFocus = trigger instanceof HTMLElement ? trigger : null;
-      lightboxNav.forEach((button) => { button.hidden = true; });
+      lightboxNav.forEach((button) => { button.hidden = activeLightboxImages.length < 2; });
+      renderProductThumbnails();
+      lightbox.dataset.lightboxSource = "product";
       lockedScrollY = window.scrollY;
       document.body.style.top = `-${lockedScrollY}px`;
       document.body.classList.add("gallery-lightbox-open");
       lightbox.hidden = false;
-      const image = lightbox.querySelector("img");
-      image.src = src;
-      image.alt = alt || "商品圖片預覽";
+      setLightboxImage(Number(index) || 0);
       lightbox.querySelector(".philosophy-lightbox-close").focus();
     };
     const showLightboxImage = (step) => {
-      lightboxIndex = (lightboxIndex + step + images.length) % images.length;
-      const image = lightbox.querySelector("img");
-      image.classList.add("is-changing");
-      window.setTimeout(() => {
-        image.src = images[lightboxIndex].currentSrc || images[lightboxIndex].src;
-        image.alt = images[lightboxIndex].alt;
-        requestAnimationFrame(() => image.classList.remove("is-changing"));
-      }, 80);
+      setLightboxImage(lightboxIndex + step, true);
     };
     const closeLightbox = () => {
       if (lightbox.hidden) return;
@@ -529,20 +585,24 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-
     on(lightbox.querySelector(".philosophy-lightbox-close"), "click", closeLightbox);
     on(lightbox.querySelector(".philosophy-lightbox-prev"), "click", () => showLightboxImage(-1));
     on(lightbox.querySelector(".philosophy-lightbox-next"), "click", () => showLightboxImage(1));
+    on(thumbnailStrip, "click", (event) => {
+      const button = event.target.closest("[data-lightbox-index]");
+      if (button) setLightboxImage(Number(button.dataset.lightboxIndex), true);
+    });
     on(lightbox, "click", (event) => { if (event.target === lightbox) closeLightbox(); });
     on(lightbox, "pointerdown", (event) => { lightboxPointerX = event.clientX; });
     on(lightbox, "pointerup", (event) => {
       if (lightboxPointerX === null) return;
       const delta = event.clientX - lightboxPointerX;
-      if (!lightboxNav[0].hidden && Math.abs(delta) > 45) showLightboxImage(delta < 0 ? 1 : -1);
+      if (activeLightboxImages.length > 1 && Math.abs(delta) > 45) showLightboxImage(delta < 0 ? 1 : -1);
       lightboxPointerX = null;
     });
     on(window, "mokomoko:open-image", openStandaloneImage);
     on(document, "keydown", (event) => {
       if (lightbox.hidden) return;
       if (event.key === "Escape") closeLightbox();
-      if (!lightboxNav[0].hidden && event.key === "ArrowLeft") showLightboxImage(-1);
-      if (!lightboxNav[0].hidden && event.key === "ArrowRight") showLightboxImage(1);
+      if (activeLightboxImages.length > 1 && event.key === "ArrowLeft") showLightboxImage(-1);
+      if (activeLightboxImages.length > 1 && event.key === "ArrowRight") showLightboxImage(1);
     });
     on(window, "resize", measure, { passive: true });
     requestAnimationFrame(() => {
@@ -589,8 +649,8 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-
     root.classList.add("reveal-enabled");
   };
 
-  const renderSite = (sourceContent) => {
-    const content = prepareEditorContent(sourceContent);
+  const renderSite = async (sourceContent) => {
+    const content = await prepareEditorContent(sourceContent);
     applyMetadata(content.meta);
     const hasAnnouncement = Boolean(content.announcement?.enabled && content.announcement.text);
     root.innerHTML = `${renderAnnouncement(content.announcement)}${renderHeader(content.header, hasAnnouncement)}<main>${renderHero(content)}${renderIntro(content)}${renderPhilosophy(content.philosophy)}${renderPricingCalculator(content)}<div id="${escapeHtml(content.integrations.featuredWorks.mountId)}" hidden></div><div id="${escapeHtml(content.integrations.recentWorks.mountId)}" hidden></div>${renderBooking(content)}${renderFaq(content.faq)}</main>${renderClosing(content)}`;
@@ -610,7 +670,7 @@ import { initEditor, prepareEditorContent } from "./modules/editor.js?v=gallery-
       galleryCleanup = initPhilosophyGallery();
     };
     initScrollReveal();
-    initEditor();
+    await initEditor(content);
   };
 
   fetch(contentUrl, { cache: "no-store" })

@@ -187,9 +187,9 @@
       { "id": "retouched-photo", "name": "單張精修", "price": 500, "stage": "post-shoot" },
       { "id": "second-pet", "name": "第 2 隻毛孩", "price": 500, "stage": "rule" },
       { "id": "studio-hour", "name": "租借攝影棚每 1 小時", "price": 1000, "stage": "rule" },
-      { "id": "strip", "name": "12 條寵生四格照", "calculatorName": "寵生四格照 12 條", "price": 500, "stage": "booking" },
-      { "id": "canvas15", "name": "15×15cm無框畫", "calculatorName": "15×15cm 無框畫", "price": 500, "stage": "booking" },
-      { "id": "canvas30", "name": "30×30cm無框畫", "calculatorName": "30×30cm 無框畫", "price": 650, "stage": "booking" }
+      { "id": "strip", "name": "12 條寵生四格照", "calculatorName": "寵生四格照 12 條", "price": 500, "stage": "booking", "image": "./assets/addon-strip-01.jpg", "images": ["./assets/addon-strip-01.jpg", "./assets/addon-strip-02.jpg", "./assets/addon-strip-03.jpg"], "imageAlt": "寵生四格照商品預覽" },
+      { "id": "canvas15", "name": "15×15cm無框畫", "calculatorName": "15×15cm 無框畫", "price": 500, "stage": "booking", "image": "./assets/addon-canvas15-01.jpg", "images": ["./assets/addon-canvas15-01.jpg", "./assets/addon-canvas15-02.jpg", "./assets/addon-canvas15-03.jpg"], "imageAlt": "15×15cm 無框畫商品預覽" },
+      { "id": "canvas30", "name": "30×30cm無框畫", "calculatorName": "30×30cm 無框畫", "price": 650, "stage": "booking", "image": "./assets/addon-canvas30-01.jpg", "images": ["./assets/addon-canvas30-01.jpg", "./assets/addon-canvas30-02.jpg", "./assets/addon-canvas30-03.jpg"], "imageAlt": "30×30cm 無框畫商品預覽" }
     ],
     "images": [
       { "path": "", "alt": "待替換：寵生四格照商品照片", "placeholder": "寵生四格照照片待替換" },
