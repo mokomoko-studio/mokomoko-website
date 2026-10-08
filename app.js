@@ -1,4 +1,4 @@
-import { initCalculator } from "./modules/calculator.js?v=mobile-swipe-1";
+import { initCalculator } from "./modules/calculator.js?v=mobile-swipe-2";
 import { initBookingForm } from "./modules/booking-form.js?v=ui-finish-1";
 import { initEditor, prepareEditorContent } from "./modules/editor.js?v=addon-image-draft-v2";
 

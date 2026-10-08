@@ -239,7 +239,7 @@ export function initCalculator(root, content) {
       const cards = [...track.querySelectorAll("[data-plan]")];
       const pagination = root.querySelector(`[data-pagination-for="${track.id}"]`);
       const viewport = track.closest(".limited-plan-viewport") || track;
-      const usesNativeScroll = track.id === "limitedPlans";
+      const usesNativeScroll = track.id === "limitedPlans" || track.id === "regularPlans";
       let drag = null;
       let suppressClickUntil = 0;
 
